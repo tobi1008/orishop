@@ -27,6 +27,10 @@ public class ProductService {
         return productRepository.findById(id);
     }
 
+    public Optional<Product> getProductBySlug(String slug) {
+        return productRepository.findBySlug(slug);
+    }
+
     public List<Product> getProductsByCategory(Long categoryId) {
         return productRepository.findByCategoryId(categoryId);
     }

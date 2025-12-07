@@ -23,7 +23,8 @@
             <!-- Product Loop -->
             <div class="col" th:each="product : ${products}">
                 <div class="card h-100 border-0 shadow-sm product-card">
-                    <a th:href="@{/product/{id}(id=${product.id})}">
+                    <a
+                        th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}">
                         <img th:if="${product.images != null && !product.images.isEmpty()}"
                             th:src="${product.images[0].imageUrl}" class="card-img-top" alt="Product Image"
                             style="height: 250px; object-fit: cover;">
@@ -33,14 +34,15 @@
                     </a>
                     <div class="card-body">
                         <h5 class="card-title">
-                            <a th:href="@{/product/{id}(id=${product.id})}" class="text-dark text-decoration-none"
-                                th:text="${product.name}">Product Name</a>
+                            <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                                class="text-dark text-decoration-none" th:text="${product.name}">Product Name</a>
                         </h5>
                         <p class="card-text fw-bold text-primary"
                             th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Price</p>
                     </div>
                     <div class="card-footer bg-transparent border-top-0 d-flex gap-2">
-                        <a th:href="@{/product/{id}(id=${product.id})}" class="btn btn-outline-primary flex-grow-1">Xem
+                        <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                            class="btn btn-outline-primary flex-grow-1">Xem
                             chi tiết</a>
                         <a th:href="@{/cart/add/{id}(id=${product.id})}" class="btn btn-primary"><i
                                 class="fa fa-cart-plus"></i></a>

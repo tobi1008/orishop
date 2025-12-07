@@ -40,7 +40,8 @@
                             </p>
                         </div>
                         <div class="card-footer bg-transparent border-top-0 d-grid gap-2">
-                            <a th:href="@{/product/{id}(id=${product.id})}" class="btn btn-outline-secondary">Chi
+                            <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                                class="btn btn-outline-secondary">Chi
                                 tiết</a>
                             <a th:href="@{/cart/add/{id}(id=${product.id})}" class="btn btn-primary"><i
                                     class="fa fa-cart-plus"></i> Thêm vào giỏ</a>

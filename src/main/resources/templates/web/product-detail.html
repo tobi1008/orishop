@@ -11,6 +11,10 @@
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                <li class="breadcrumb-item" th:if="${product.category != null}">
+                    <a th:href="@{/category/{slug}(slug=${product.category.slug != null && product.category.slug != '' ? product.category.slug : product.category.id})}"
+                        th:text="${product.category.name}">Category</a>
+                </li>
                 <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Sản phẩm</li>
             </ol>
         </nav>

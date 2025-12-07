@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    java.util.Optional<Product> findBySlug(String slug);
+
     List<Product> findByCategoryId(Long categoryId);
 
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")

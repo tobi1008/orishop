@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.util.List;
+import java.text.Normalizer;
+import java.util.regex.Pattern;
 
 @Controller
 @RequestMapping("/admin")
@@ -86,6 +88,10 @@ public class AdminController {
 
         Product productToSave;
 
+        if (product.getSlug() == null || product.getSlug().trim().isEmpty()) {
+            product.setSlug(toSlug(product.getName()));
+        }
+
         // 1. Kiểm tra xem là Thêm mới hay Cập nhật
         if (product.getId() != null) {
             // Trường hợp Edit: Lấy sản phẩm cũ từ DB ra để giữ lại các quan hệ (Images)
@@ -97,6 +103,8 @@ public class AdminController {
                 existingProduct.setStockQuantity(product.getStockQuantity());
                 existingProduct.setCategory(product.getCategory());
                 existingProduct.setDescription(product.getDescription());
+                existingProduct.setDescription(product.getDescription());
+                existingProduct.setSlug(product.getSlug()); // Should be non-empty now
                 // KHÔNG set lại images thành null, giữ nguyên images cũ
 
                 productToSave = existingProduct;
@@ -169,6 +177,10 @@ public class AdminController {
 
     @PostMapping("/categories")
     public String saveCategory(@ModelAttribute Category category) {
+        if (category.getSlug() == null || category.getSlug().trim().isEmpty()) {
+            category.setSlug(toSlug(category.getName()));
+        }
+
         if (category.getId() != null) {
             // Edit mode: fetch existing to keep relationships if any
             Category existingCategory = categoryRepository.findById(category.getId()).orElse(null);
@@ -231,5 +243,38 @@ public class AdminController {
     public String userList(Model model) {
         model.addAttribute("users", userRepository.findAll());
         return "admin/user-list";
+    }
+
+    // --- System Utilities ---
+    @GetMapping("/system/fix-slugs")
+    public String fixSlugs() {
+        // Fix Products
+        List<Product> products = productService.getAllProducts();
+        for (Product p : products) {
+            if (p.getSlug() == null || p.getSlug().trim().isEmpty()) {
+                p.setSlug(toSlug(p.getName()));
+                productService.saveProduct(p);
+            }
+        }
+
+        // Fix Categories
+        List<Category> categories = categoryRepository.findAll();
+        for (Category c : categories) {
+            if (c.getSlug() == null || c.getSlug().trim().isEmpty()) {
+                c.setSlug(toSlug(c.getName()));
+                categoryRepository.save(c);
+            }
+        }
+
+        return "redirect:/admin?fixedSlugs=true";
+    }
+
+    private String toSlug(String input) {
+        if (input == null)
+            return "";
+        String nowhitespace = input.trim().replaceAll("\\s+", "-");
+        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        return pattern.matcher(normalized).replaceAll("").toLowerCase();
     }
 }

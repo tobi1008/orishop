@@ -24,7 +24,8 @@
                                 <hr class="dropdown-divider">
                             </li>
                             <li th:each="cat : ${globalCategories}">
-                                <a class="dropdown-item" th:href="@{/product/category/{id}(id=${cat.id})}"
+                                <a class="dropdown-item"
+                                    th:href="@{/category/{slug}(slug=${cat.slug != null && cat.slug != '' ? cat.slug : cat.id})}"
                                     th:text="${cat.name}">Category Name</a>
                             </li>
                         </ul>

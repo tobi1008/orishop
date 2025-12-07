@@ -24,6 +24,11 @@
             </div>
 
             <div class="col-md-4">
+                <label for="slug" class="form-label">Slug (URL)</label>
+                <input type="text" class="form-control" id="slug" th:field="*{slug}" placeholder="tu-dong-theo-ten">
+            </div>
+
+            <div class="col-md-4">
                 <label for="category" class="form-label">Danh mục</label>
                 <select id="category" class="form-select" th:field="*{category}">
                     <option value="">-- Chọn danh mục --</option>

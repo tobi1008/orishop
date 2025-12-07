@@ -1,6 +1,8 @@
 package com.orishop.controller.site;
 
 import com.orishop.model.Product;
+import com.orishop.model.Category;
+import com.orishop.repository.CategoryRepository;
 import com.orishop.service.impl.ProductService;
 import com.orishop.service.impl.CartService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,8 @@ public class WebController {
 
     private final ProductService productService;
     private final CartService cartService;
+    private final CategoryRepository categoryRepository;
+    private final com.orishop.service.OrderService orderService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -21,10 +25,23 @@ public class WebController {
         return "web/index"; // templates/web/index.html
     }
 
-    @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
-        Product product = productService.getProductById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+    @GetMapping("/product/{slug}")
+    public String productDetail(@PathVariable String slug, Model model) {
+        Product product = productService.getProductBySlug(slug).orElse(null);
+
+        if (product == null) {
+            try {
+                Long id = Long.parseLong(slug);
+                product = productService.getProductById(id).orElse(null);
+            } catch (NumberFormatException e) {
+                // Ignore, slug is not an ID
+            }
+        }
+
+        if (product == null) {
+            throw new RuntimeException("Product not found");
+        }
+
         model.addAttribute("product", product);
         return "web/product-detail";
     }
@@ -41,9 +58,25 @@ public class WebController {
         return "web/product-list";
     }
 
-    @GetMapping("/product/category/{categoryId}")
-    public String productsByCategory(@PathVariable Long categoryId, Model model) {
-        model.addAttribute("products", productService.getProductsByCategory(categoryId));
+    @GetMapping("/category/{slug}")
+    public String productsByCategory(@PathVariable String slug, Model model) {
+        Category category = categoryRepository.findBySlug(slug).orElse(null);
+
+        if (category == null) {
+            try {
+                Long id = Long.parseLong(slug);
+                category = categoryRepository.findById(id).orElse(null);
+            } catch (NumberFormatException e) {
+                // Ignore
+            }
+        }
+
+        if (category == null) {
+            throw new RuntimeException("Category not found");
+        }
+
+        model.addAttribute("products", productService.getProductsByCategory(category.getId()));
+        model.addAttribute("currentCategory", category);
         return "web/product-list";
     }
 
@@ -80,7 +113,7 @@ public class WebController {
         return "redirect:/cart";
     }
 
-    private final com.orishop.service.OrderService orderService;
+    // private final com.orishop.service.OrderService orderService; // Moved to top
 
     // ... (các API Cart cũ giữ nguyên) ...
 
