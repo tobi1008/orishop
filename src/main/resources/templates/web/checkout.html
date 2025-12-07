@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Thanh toán - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <h2 class="mb-4 text-center">Thanh toán đơn hàng</h2>
+
+        <div class="row">
+            <!-- Cột thông tin giao hàng -->
+            <div class="col-md-7">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h4 class="card-title mt-2">Thông tin giao hàng</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/checkout}" method="post" id="checkoutForm">
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Họ và tên người nhận</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName" required
+                                    placeholder="Nguyễn Văn A">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required
+                                    placeholder="09xxxxxxx">
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Địa chỉ nhận hàng</label>
+                                <textarea class="form-control" id="address" name="address" rows="3" required
+                                    placeholder="Số nhà, đường, phường/xã..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="note" class="form-label">Ghi chú (tùy chọn)</label>
+                                <textarea class="form-control" id="note" name="note" rows="2"
+                                    placeholder="Ghi chú về đơn hàng, ví dụ: thời gian nhận hàng"></textarea>
+                            </div>
+
+                            <h4 class="mt-4">Phương thức thanh toán</h4>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD"
+                                    checked>
+                                <label class="form-check-label" for="cod">
+                                    Thanh toán khi nhận hàng (COD)
+                                </label>
+                            </div>
+                            <div class="form-check disabled">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="banking"
+                                    value="BANKING" disabled>
+                                <label class="form-check-label text-muted" for="banking">
+                                    Chuyển khoản ngân hàng (Đang bảo trì)
+                                </label>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột tóm tắt đơn hàng -->
+            <div class="col-md-5">
+                <div class="card shadow-sm bg-light">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Đơn hàng của bạn</h4>
+                        <ul class="list-group mb-3">
+                            <li class="list-group-item d-flex justify-content-between lh-sm"
+                                th:each="item : ${cartItems}">
+                                <div>
+                                    <h6 class="my-0" th:text="${item.productName}">Product name</h6>
+                                    <small class="text-muted" th:text="'x ' + ${item.quantity}">x 1</small>
+                                </div>
+                                <span class="text-muted"
+                                    th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between bg-white fw-bold">
+                                <span>Tổng cộng (VND)</span>
+                                <strong class="text-danger"
+                                    th:text="${#numbers.formatDecimal(cartTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0
+                                    đ</strong>
+                            </li>
+                        </ul>
+
+                        <button type="submit" form="checkoutForm" class="btn btn-primary w-100 btn-lg">Đặt hàng</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

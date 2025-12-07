@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Danh mục - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Thêm mới Danh mục</h1>
+        </div>
+
+        <form th:action="@{/admin/categories}" th:object="${category}" method="post" class="col-md-6">
+            <input type="hidden" th:field="*{id}">
+
+            <div class="mb-3">
+                <label for="name" class="form-label">Tên danh mục</label>
+                <input type="text" class="form-control" id="name" th:field="*{name}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="slug" class="form-label">Slug (URL)</label>
+                <input type="text" class="form-control" id="slug" th:field="*{slug}" placeholder="tu-dong-theo-ten">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu danh mục</button>
+            <a href="/admin/categories" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</body>
+
+</html>

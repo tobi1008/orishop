@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Đơn hàng - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <h2 class="mb-4">Quản lý Đơn hàng</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Ngày đặt</th>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.id}">#123</td>
+                        <td th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}">Date</td>
+                        <td th:text="${order.user != null ? order.user.fullName : 'Khách lẻ'}">Customer</td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">Total
+                        </td>
+                        <td>
+                            <span class="badge bg-warning text-dark" th:text="${order.status}">PENDING</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">Chi tiết</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${orders.isEmpty()}">
+                        <td colspan="6" class="text-center">Chưa có đơn hàng nào.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Trang chủ - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <!-- Banner -->
+        <div class="p-5 mb-4 bg-light rounded-3 jumbotron text-white"
+            style="background: linear-gradient(135deg, #d63384, #fd7e14);">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold">OriShop Winter Sale</h1>
+                <p class="col-md-8 fs-4">Giảm giá lên đến 50% các sản phẩm son môi và dưỡng da. Mua ngay để nhận ưu đãi
+                    đặc
+                    biệt.</p>
+                <button class="btn btn-light btn-lg text-danger" type="button">Mua ngay</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row mb-3">
+                <h2 class="text-center text-uppercase text-secondary">Sản phẩm nổi bật</h2>
+                <hr>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                <!-- Loop products -->
+                <div class="col" th:each="product : ${products}">
+                    <div class="card h-100 card-product shadow-sm border-0">
+                        <img th:src="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
+                            class="card-img-top" alt="Product Image" style="height: 250px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title text-truncate" th:text="${product.name}">Tên sản phẩm</h5>
+                            <p class="card-text text-danger fw-bold"
+                                th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                500.000 đ
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0 d-grid gap-2">
+                            <a th:href="@{/product/{id}(id=${product.id})}" class="btn btn-outline-secondary">Chi
+                                tiết</a>
+                            <a th:href="@{/cart/add/{id}(id=${product.id})}" class="btn btn-primary"><i
+                                    class="fa fa-cart-plus"></i> Thêm vào giỏ</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty state -->
+                <div th:if="${products == null || products.isEmpty()}" class="col-12 text-center py-5">
+                    <p>Chưa có sản phẩm nào. Vui lòng quay lại sau.</p>
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Đăng nhập - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow border-0">
+                    <div class="card-body p-4">
+                        <h3 class="text-center mb-4 text-primary">Đăng Nhập</h3>
+
+                        <div th:if="${param.error}" class="alert alert-danger">
+                            Email hoặc mật khẩu không đúng!
+                        </div>
+                        <div th:if="${param.logout}" class="alert alert-success">
+                            Đã đăng xuất thành công.
+                        </div>
+
+                        <form th:action="@{/auth/login}" method="post">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="username"
+                                    placeholder="name@example.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mật khẩu</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember">
+                                <label class="form-check-label" for="remember">Ghi nhớ đăng nhập</label>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">Đăng nhập</button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <p>Chưa có tài khoản? <a href="/auth/register" class="text-decoration-none">Đăng ký ngay</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

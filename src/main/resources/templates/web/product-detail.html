@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title th:text="${product.name} + ' - OriShop'">Chi tiết sản phẩm - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${product.name}">Sản phẩm</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- Cột ảnh sản phẩm -->
+            <!-- Cột ảnh sản phẩm -->
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 mb-3">
+                    <!-- Main Image -->
+                    <img id="mainImage" th:if="${product.images != null && !product.images.isEmpty()}"
+                        th:src="${product.images[0].imageUrl}" class="card-img-top rounded shadow-sm"
+                        alt="Product Image" style="object-fit: cover; height: 400px;">
+
+                    <img id="mainImage" th:unless="${product.images != null && !product.images.isEmpty()}"
+                        src="https://dummyimage.com/600x600/dee2e6/6c757d.jpg" class="card-img-top rounded shadow-sm"
+                        alt="Default Image" style="object-fit: cover; height: 400px;">
+                </div>
+
+                <!-- Thumbnails -->
+                <div class="d-flex gap-2 overflow-auto" th:if="${product.images != null && product.images.size() > 1}">
+                    <div th:each="img : ${product.images}" class="thumbnail-container" style="cursor: pointer;">
+                        <img th:src="${img.imageUrl}" class="img-thumbnail"
+                            style="width: 80px; height: 80px; object-fit: cover;"
+                            onclick="document.getElementById('mainImage').src=this.src">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột thông tin -->
+            <div class="col-md-6">
+                <h1 class="fw-bold mb-3" th:text="${product.name}">Tên sản phẩm</h1>
+
+                <div class="mb-3">
+                    <span class="h3 text-danger fw-bold"
+                        th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">500.000
+                        đ</span>
+                </div>
+
+                <p class="lead" th:text="${product.description}">Mô tả sản phẩm...</p>
+
+                <div class="mb-4">
+                    <strong>Tình trạng: </strong>
+                    <span th:if="${product.stockQuantity > 0}" class="text-success checkbox"><i
+                            class="fa fa-check-circle"></i> Còn hàng</span>
+                    <span th:unless="${product.stockQuantity > 0}" class="text-danger"><i
+                            class="fa fa-times-circle"></i> Hết hàng</span>
+                </div>
+
+                <!-- Form thêm vào giỏ hàng -->
+                <form th:action="@{/cart/add}" method="post" class="d-flex align-items-center gap-3">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+
+                    <div class="input-group" style="width: 130px;">
+                        <button class="btn btn-outline-secondary" type="button"
+                            onclick="this.parentNode.querySelector('input[type=number]').stepDown()">-</button>
+                        <input type="number" name="quantity" class="form-control text-center" value="1" min="1"
+                            max="10">
+                        <button class="btn btn-outline-secondary" type="button"
+                            onclick="this.parentNode.querySelector('input[type=number]').stepUp()">+</button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg flex-grow-1"
+                        th:disabled="${product.stockQuantity <= 0}">
+                        <i class="fa fa-shopping-cart me-2"></i> Thêm vào giỏ
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="small text-muted">
+                    <p><i class="fa fa-truck me-2"></i> Miễn phí vận chuyển cho đơn hàng trên 500k</p>
+                    <p><i class="fa fa-undo me-2"></i> Đổi trả trong vòng 7 ngày</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

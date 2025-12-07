@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Đăng ký tài khoản - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow border-0">
+                    <div class="card-header bg-white text-center py-4 border-0">
+                        <h3 class="text-primary fw-bold mb-0">Tạo tài khoản mới</h3>
+                    </div>
+                    <div class="card-body p-4 pt-0">
+                        <form th:action="@{/auth/register}" th:object="${user}" method="post">
+
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Họ và tên</label>
+                                <input type="text" class="form-control" id="fullName" th:field="*{fullName}" required
+                                    placeholder="Nguyễn Văn A">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Địa chỉ Email</label>
+                                <input type="email" class="form-control" id="email" th:field="*{email}" required
+                                    placeholder="name@example.com">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone" th:field="*{phone}"
+                                    placeholder="0901234567">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Mật khẩu</label>
+                                <input type="password" class="form-control" id="password" th:field="*{password}"
+                                    required>
+                                <div class="form-text">Mật khẩu nên có ít nhất 6 ký tự.</div>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg">Đăng ký ngay</button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3 pt-3 border-top">
+                            <p>Đã có tài khoản? <a href="/auth/login" class="text-decoration-none fw-bold">Đăng nhập</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

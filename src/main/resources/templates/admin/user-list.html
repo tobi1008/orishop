@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Users - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <h2 class="mb-4">Quản lý Người dùng</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}">1</td>
+                        <td th:text="${user.fullName}">Tên User</td>
+                        <td th:text="${user.email}">user@example.com</td>
+                        <td th:text="${user.phone}">090...</td>
+                        <td>
+                            <span th:class="${user.role == 'ROLE_ADMIN' ? 'badge bg-danger' : 'badge bg-primary'}"
+                                th:text="${user.role}">ROLE</span>
+                        </td>
+                        <td>
+                            <span th:class="${user.enabled ? 'badge bg-success' : 'badge bg-secondary'}"
+                                th:text="${user.enabled ? 'Active' : 'Disabled'}">Enabled</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

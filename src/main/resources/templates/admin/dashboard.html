@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Dashboard - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Dashboard</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <div class="btn-group me-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card text-white bg-primary shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Total Orders</h6>
+                                <h2 class="my-2" th:text="${totalOrders}">150</h2>
+                                <p class="mb-0 small"><span class="badge bg-white text-primary">+5%</span> vs last month
+                                </p>
+                            </div>
+                            <i class="fa fa-shopping-cart fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-white bg-success shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Total Revenue</h6>
+                                <h2 class="my-2"
+                                    th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    $5,300</h2>
+                                <p class="mb-0 small"><span class="badge bg-white text-success">+12%</span> vs last
+                                    month</p>
+                            </div>
+                            <i class="fa fa-dollar-sign fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-white bg-warning shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Products</h6>
+                                <h2 class="my-2" th:text="${totalProducts}">80</h2>
+                                <p class="mb-0 small">In stock</p>
+                            </div>
+                            <i class="fa fa-box fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="card text-white bg-danger shadow">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-0">Customers</h6>
+                                <h2 class="my-2" th:text="${totalUsers}">1,200</h2>
+                                <p class="mb-0 small"><span class="badge bg-white text-danger">+3%</span> new</p>
+                            </div>
+                            <i class="fa fa-users fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Recent Orders</h2>
+        <div class="table-responsive">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${recentOrders}">
+                        <td th:text="${order.id}">1001</td>
+                        <td th:text="${#dates.format(order.createdAt, 'yyyy-MM-dd')}">2023-12-01</td>
+                        <td
+                            th:text="${order.shippingName != null ? order.shippingName : (order.user != null ? order.user.fullName : 'Guest')}">
+                            Nguyen Van A</td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            500.000 đ</td>
+                        <td>
+                            <span th:class="'badge ' + 
+                                (${order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'} ? 'bg-success' : 
+                                (${order.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 
+                                (${order.status.name() == 'CANCELLED'} ? 'bg-danger' : 'bg-secondary')))"
+                                th:text="${order.status}">Completed</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${recentOrders == null || recentOrders.isEmpty()}">
+                        <td colspan="5" class="text-center">No recent others.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
