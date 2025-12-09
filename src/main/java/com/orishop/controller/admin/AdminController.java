@@ -11,6 +11,11 @@ import com.orishop.repository.ProductImageRepository;
 import com.orishop.repository.UserRepository;
 import com.orishop.service.impl.CloudinaryService;
 import com.orishop.service.impl.ProductService;
+import com.orishop.service.impl.ProductService;
+import com.orishop.service.ReviewService;
+import com.orishop.service.CouponService;
+import com.orishop.model.Coupon;
+import org.springframework.format.annotation.DateTimeFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -34,6 +39,8 @@ public class AdminController {
     // Service upload ảnh & Repository lưu ảnh
     private final CloudinaryService cloudinaryService;
     private final ProductImageRepository productImageRepository;
+    private final ReviewService reviewService;
+    private final CouponService couponService;
 
     @GetMapping
     public String dashboard(Model model) {
@@ -43,6 +50,7 @@ public class AdminController {
         // dùng trong design mới
         model.addAttribute("totalOrders", orderRepository.count());
         model.addAttribute("totalUsers", userRepository.count());
+        model.addAttribute("totalCoupons", couponService.getAllCoupons().size());
 
         // Tính tổng doanh thu
         BigDecimal totalRevenue = orderRepository.findAll().stream()
@@ -238,11 +246,23 @@ public class AdminController {
         return "redirect:/admin/orders/" + id;
     }
 
+    @GetMapping("/orders/delete/{id}")
+    public String deleteOrder(@PathVariable Long id) {
+        orderRepository.deleteById(id);
+        return "redirect:/admin/orders";
+    }
+
     // --- Users ---
     @GetMapping("/users")
     public String userList(Model model) {
         model.addAttribute("users", userRepository.findAll());
         return "admin/user-list";
+    }
+
+    @GetMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable Long id) {
+        userRepository.deleteById(id);
+        return "redirect:/admin/users";
     }
 
     // --- System Utilities ---
@@ -276,5 +296,57 @@ public class AdminController {
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         return pattern.matcher(normalized).replaceAll("").toLowerCase();
+    }
+
+    // --- Reviews ---
+    @GetMapping("/reviews")
+    public String reviewList(Model model) {
+        model.addAttribute("reviews", reviewService.getAllReviews());
+        return "admin/review-list";
+    }
+
+    @GetMapping("/reviews/delete/{id}")
+    public String deleteReview(@PathVariable Long id) {
+        reviewService.deleteReview(id);
+        return "redirect:/admin/reviews";
+    }
+
+    // --- Coupons ---
+    @GetMapping("/coupons")
+    public String couponList(Model model) {
+        model.addAttribute("coupons", couponService.getAllCoupons());
+        return "admin/coupon-list";
+    }
+
+    @GetMapping("/coupons/new")
+    public String createCouponForm(Model model) {
+        model.addAttribute("coupon", new Coupon());
+        return "admin/coupon-form";
+    }
+
+    @GetMapping("/coupons/edit/{id}")
+    public String editCouponForm(@PathVariable Long id, Model model) {
+        Coupon coupon = couponService.getCouponById(id);
+        if (coupon == null) {
+            return "redirect:/admin/coupons";
+        }
+        model.addAttribute("coupon", coupon);
+        return "admin/coupon-form";
+    }
+
+    @PostMapping("/coupons")
+    public String saveCoupon(@ModelAttribute Coupon coupon) {
+        // Basic validation/setting defaults if needed
+        if (coupon.getUsedCount() == null) {
+            coupon.setUsedCount(0);
+        }
+        couponService.saveCoupon(coupon);
+        return "redirect:/admin/coupons";
+    }
+
+    @GetMapping("/coupons/delete/{id}")
+    public String deleteCoupon(@PathVariable Long id) {
+        couponService.deleteCoupon(id);
+        return "redirect:/admin/coupons";
     }
 }

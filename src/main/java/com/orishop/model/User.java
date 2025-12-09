@@ -35,6 +35,8 @@ public class User {
 
     private String avatar;
 
+    private String address;
+
     private boolean enabled = true;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,6 +46,10 @@ public class User {
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
     private List<Order> orders;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<Review> reviews;
 
     @Override
     public final boolean equals(Object o) {

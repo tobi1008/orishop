@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Đơn mua - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <h2 class="mb-4">Đơn hàng của tôi</h2>
+
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="fa fa-user-circle fa-2x text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 fw-bold" th:text="${#authentication.name}">Username</h6>
+                            </div>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="/profile" class="list-group-item list-group-item-action">Hồ sơ cá nhân</a>
+                            <a href="/orders" class="list-group-item list-group-item-action active">Đơn mua</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div th:if="${orders == null || orders.isEmpty()}" class="text-center py-5">
+                            <i class="fa fa-box-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Bạn chưa có đơn hàng nào.</p>
+                            <a href="/" class="btn btn-primary">Mua sắm ngay</a>
+                        </div>
+
+                        <div th:if="${orders != null && !orders.isEmpty()}" class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Trạng thái</th>
+                                        <th>Tổng tiền</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="order : ${orders}">
+                                        <td>#<span th:text="${order.id}">123</span></td>
+                                        <td th:text="${#dates.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025
+                                        </td>
+                                        <td>
+                                            <span th:class="'badge ' +
+                                                (${order.status.name() == 'PENDING'} ? 'bg-warning' :
+                                                (${order.status.name() == 'SHIPPING'} ? 'bg-info' :
+                                                (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 'bg-danger')))"
+                                                th:text="${order.status}">PENDING</span>
+                                        </td>
+                                        <td class="fw-bold"
+                                            th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                            100.000 đ</td>
+                                        <td>
+                                            <a href="#" class="btn btn-sm btn-outline-primary"
+                                                onclick="alert('Tính năng xem chi tiết đang phát triển!')">Chi tiết</a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

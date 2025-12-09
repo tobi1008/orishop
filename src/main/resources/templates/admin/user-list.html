@@ -19,6 +19,7 @@
                         <th>Số điện thoại</th>
                         <th>Vai trò</th>
                         <th>Trạng thái</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -34,6 +35,10 @@
                         <td>
                             <span th:class="${user.enabled ? 'badge bg-success' : 'badge bg-secondary'}"
                                 th:text="${user.enabled ? 'Active' : 'Disabled'}">Enabled</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/users/delete/{id}(id=${user.id})}" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa user này?');">Xóa</a>
                         </td>
                     </tr>
                 </tbody>

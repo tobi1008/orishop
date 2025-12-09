@@ -25,6 +25,9 @@ public class Order {
     @Column(nullable = false)
     private BigDecimal totalAmount;
 
+    private String couponCode;
+    private BigDecimal discountAmount;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
@@ -33,6 +36,8 @@ public class Order {
     private String shippingName; // Người nhận
 
     private String paymentMethod; // COD, VNPay...
+
+    private String note;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems;

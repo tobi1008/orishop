@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Hồ sơ cá nhân - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <h2 class="mb-4">Hồ sơ cá nhân</h2>
+
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="fa fa-user-circle fa-2x text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 fw-bold" th:text="${user.fullName}">Username</h6>
+                                <small class="text-muted" th:text="${user.email}">user@example.com</small>
+                            </div>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="/profile" class="list-group-item list-group-item-action active">Hồ sơ cá nhân</a>
+                            <a href="/orders" class="list-group-item list-group-item-action">Đơn mua</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Thông tin tài khoản</h4>
+                        <form>
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label fw-bold">Họ và tên:</label>
+                                <div class="col-sm-9">
+                                    <input type="text" readonly class="form-control-plaintext"
+                                        th:value="${user.fullName}">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label fw-bold">Email:</label>
+                                <div class="col-sm-9">
+                                    <input type="text" readonly class="form-control-plaintext" th:value="${user.email}">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label fw-bold">Số điện thoại:</label>
+                                <div class="col-sm-9">
+                                    <input type="text" readonly class="form-control-plaintext"
+                                        th:value="${user.phone != null ? user.phone : 'Chưa cập nhật'}">
+                                </div>
+                            </div>
+                            <div class="mb-3 row">
+                                <label class="col-sm-3 col-form-label fw-bold">Địa chỉ:</label>
+                                <div class="col-sm-9">
+                                    <input type="text" readonly class="form-control-plaintext"
+                                        th:value="${user.address != null ? user.address : 'Chưa cập nhật'}">
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <a href="#" class="btn btn-primary"
+                                    onclick="alert('Tính năng cập nhật hồ sơ đang được phát triển!')">Chỉnh sửa thông
+                                    tin</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

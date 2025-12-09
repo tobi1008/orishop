@@ -83,20 +83,52 @@
                 <div class="card border-0 shadow-sm bg-body-tertiary">
                     <div class="card-body">
                         <h4 class="card-title fw-bold mb-4">Tổng đơn hàng</h4>
-                        <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                        <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted">Tạm tính:</span>
-                            <span class="fw-bold fs-5" th:if="${cartTotal != null}"
+                            <span class="fw-bold"
                                 th:text="${#numbers.formatDecimal(cartTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-4">
+
+                        <!-- Discount Row -->
+                        <div class="d-flex justify-content-between mb-3 text-success"
+                            th:if="${discountAmount != null && discountAmount > 0}">
+                            <span><i class="fa fa-ticket"></i> Giảm giá:</span>
+                            <span class="fw-bold"
+                                th:text="'- ' + ${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">-
+                                0 đ</span>
+                        </div>
+
+                        <div class="d-flex justify-content-between mb-4 border-bottom pb-3">
                             <span class="text-muted">Phí vận chuyển:</span>
                             <span class="text-success">Miễn phí</span>
                         </div>
+
                         <div class="d-flex justify-content-between mb-4">
                             <span class="fw-bold fs-4">Tổng cộng:</span>
-                            <span class="fw-bold fs-4 text-danger" th:if="${cartTotal != null}"
-                                th:text="${#numbers.formatDecimal(cartTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                            <span class="fw-bold fs-4 text-danger"
+                                th:text="${#numbers.formatDecimal(finalTotal != null ? finalTotal : cartTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0
+                                đ</span>
                         </div>
+
+                        <!-- Coupon Form -->
+                        <div class="mb-4">
+                            <form th:action="@{/cart/coupon}" method="post" class="input-group"
+                                th:if="${appliedCoupon == null}">
+                                <input type="text" name="code" class="form-control" placeholder="Mã giảm giá">
+                                <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                            </form>
+                            <div th:if="${appliedCoupon != null}"
+                                class="alert alert-success d-flex justify-content-between align-items-center p-2 mb-0">
+                                <span><small>Đang dùng:</small> <strong th:text="${appliedCoupon}">CODE</strong></span>
+                                <a th:href="@{/cart/coupon/remove}" class="text-danger"><i class="fa fa-times"></i></a>
+                            </div>
+                            <!-- Flash Messages -->
+                            <div th:if="${successMessage}" class="alert alert-success mt-2 py-2 small"
+                                th:text="${successMessage}"></div>
+                            <div th:if="${errorMessage}" class="alert alert-danger mt-2 py-2 small"
+                                th:text="${errorMessage}"></div>
+                        </div>
+
                         <a href="/checkout"
                             class="btn btn-primary w-100 py-3 fw-bold text-uppercase rounded-3 shadow">Tiến hành thanh
                             toán</a>

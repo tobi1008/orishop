@@ -75,10 +75,20 @@
                                 <span class="text-muted"
                                     th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000</span>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between lh-sm"
+                                th:if="${discountAmount != null && discountAmount > 0}">
+                                <div class="text-success">
+                                    <h6 class="my-0">Mã giảm giá</h6>
+                                    <small>Đã áp dụng</small>
+                                </div>
+                                <span class="text-success"
+                                    th:text="'- ' + ${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">-
+                                    0 đ</span>
+                            </li>
                             <li class="list-group-item d-flex justify-content-between bg-white fw-bold">
                                 <span>Tổng cộng (VND)</span>
                                 <strong class="text-danger"
-                                    th:text="${#numbers.formatDecimal(cartTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0
+                                    th:text="${#numbers.formatDecimal(finalTotal != null ? finalTotal : cartTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0
                                     đ</strong>
                             </li>
                         </ul>

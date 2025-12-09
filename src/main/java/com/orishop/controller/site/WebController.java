@@ -5,6 +5,11 @@ import com.orishop.model.Category;
 import com.orishop.repository.CategoryRepository;
 import com.orishop.service.impl.ProductService;
 import com.orishop.service.impl.CartService;
+import com.orishop.service.ReviewService;
+import com.orishop.repository.UserRepository;
+import com.orishop.model.Review;
+import com.orishop.model.User;
+import java.security.Principal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +23,8 @@ public class WebController {
     private final CartService cartService;
     private final CategoryRepository categoryRepository;
     private final com.orishop.service.OrderService orderService;
+    private final ReviewService reviewService;
+    private final UserRepository userRepository;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -43,7 +50,43 @@ public class WebController {
         }
 
         model.addAttribute("product", product);
+        model.addAttribute("reviews", reviewService.getReviewsByProduct(product.getId()));
         return "web/product-detail";
+    }
+
+    @PostMapping("/product/review")
+    public String addReview(@RequestParam Long productId,
+            @RequestParam int rating,
+            @RequestParam String comment,
+            Principal principal) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+
+        Product product = productService.getProductById(productId).orElse(null);
+        if (product == null) {
+            return "redirect:/";
+        }
+
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+
+        Review review = new Review();
+        review.setProduct(product);
+        review.setUser(user);
+        review.setRating(rating);
+        review.setComment(comment);
+
+        reviewService.saveReview(review);
+
+        String slug = product.getSlug();
+        if (slug == null || slug.isEmpty()) {
+            slug = String.valueOf(product.getId());
+        }
+
+        return "redirect:/product/" + slug;
     }
 
     @GetMapping("/product")
@@ -85,12 +128,33 @@ public class WebController {
     public String viewCart(Model model) {
         model.addAttribute("cartItems", cartService.getCart());
         model.addAttribute("cartTotal", cartService.getCartTotal());
+        model.addAttribute("discountAmount", cartService.getDiscountAmount());
+        model.addAttribute("finalTotal", cartService.getFinalTotal());
+        model.addAttribute("appliedCoupon", cartService.getAppliedCoupon());
         return "web/cart";
     }
 
     @PostMapping("/cart/add")
     public String addToCart(@RequestParam Long productId, @RequestParam int quantity) {
         cartService.addToCart(productId, quantity);
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/coupon")
+    public String applyCoupon(@RequestParam String code,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        try {
+            cartService.applyCoupon(code);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã áp dụng mã giảm giá thành công!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/cart";
+    }
+
+    @GetMapping("/cart/coupon/remove")
+    public String removeCoupon() {
+        cartService.removeCoupon();
         return "redirect:/cart";
     }
 
@@ -131,6 +195,8 @@ public class WebController {
         }
         model.addAttribute("cartItems", cartService.getCart());
         model.addAttribute("cartTotal", cartService.getCartTotal());
+        model.addAttribute("discountAmount", cartService.getDiscountAmount());
+        model.addAttribute("finalTotal", cartService.getFinalTotal());
         return "web/checkout";
     }
 
@@ -138,14 +204,47 @@ public class WebController {
     public String placeOrder(@RequestParam String fullName,
             @RequestParam String phone,
             @RequestParam String address,
-            @RequestParam(required = false) String note) {
+            @RequestParam(required = false) String note,
+            Principal principal) {
 
-        // Hiện tại user đang để null (khách lẻ). Sau này dùng SecurityContextHolder lấy
-        // user
-        orderService.placeOrder(null, cartService.getCart(), fullName, phone, address, note);
+        User user = null;
+        if (principal != null) {
+            user = userRepository.findByEmail(principal.getName()).orElse(null);
+        }
+
+        orderService.placeOrder(user, cartService.getCart(), fullName, phone, address, note,
+                cartService.getAppliedCoupon(), cartService.getDiscountAmount());
 
         cartService.clearCart();
         return "redirect:/checkout/success";
+    }
+
+    @GetMapping("/orders")
+    public String myOrders(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+
+        model.addAttribute("orders", orderService.getOrdersByUser(user.getId()));
+        model.addAttribute("orders", orderService.getOrdersByUser(user.getId()));
+        return "web/order-list";
+    }
+
+    @GetMapping("/profile")
+    public String profile(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+        model.addAttribute("user", user);
+        return "web/profile";
     }
 
     @GetMapping("/checkout/success")

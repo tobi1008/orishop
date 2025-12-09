@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Coupon Management - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Coupons</h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <a href="/admin/coupons/new" class="btn btn-sm btn-primary">
+                    <i class="fa fa-plus"></i> Add New Coupon
+                </a>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Code</th>
+                        <th>Type</th>
+                        <th>Value</th>
+                        <th>Dates</th>
+                        <th>Usage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="coupon : ${coupons}">
+                        <td th:text="${coupon.id}">1</td>
+                        <td>
+                            <strong th:text="${coupon.code}" class="text-primary">CODE</strong>
+                        </td>
+                        <td>
+                            <span th:if="${coupon.discountType == 'PERCENT'}" class="badge bg-info">Percent</span>
+                            <span th:if="${coupon.discountType == 'AMOUNT'}" class="badge bg-success">Amount</span>
+                        </td>
+                        <td>
+                            <span th:if="${coupon.discountType == 'PERCENT'}"
+                                th:text="${coupon.discountValue + '%'}">10%</span>
+                            <span th:if="${coupon.discountType == 'AMOUNT'}"
+                                th:text="${#numbers.formatDecimal(coupon.discountValue, 0, 'COMMA', 0, 'POINT')} + ' đ'">10.000
+                                đ</span>
+                        </td>
+                        <td>
+                            <small class="d-block text-muted">Start: <span
+                                    th:text="${#dates.format(coupon.startDate, 'dd/MM/yyyy')}"></span></small>
+                            <small class="d-block text-muted">End: <span
+                                    th:text="${#dates.format(coupon.endDate, 'dd/MM/yyyy')}"></span></small>
+                        </td>
+                        <td>
+                            <span th:text="${coupon.usedCount}">0</span> / <span
+                                th:text="${coupon.usageLimit != null ? coupon.usageLimit : '∞'}">100</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/coupons/edit/{id}(id=${coupon.id})}"
+                                class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i></a>
+                            <a th:href="@{/admin/coupons/delete/{id}(id=${coupon.id})}"
+                                class="btn btn-sm btn-outline-danger"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này không?');"><i
+                                    class="fa fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    <tr th:if="${coupons == null || coupons.isEmpty()}">
+                        <td colspan="7" class="text-center py-4">No coupons found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>

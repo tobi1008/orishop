@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Coupon Form - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2" th:text="${coupon.id == null ? 'Create New Coupon' : 'Edit Coupon'}">Coupon Form</h1>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <form th:action="@{/admin/coupons}" method="post" th:object="${coupon}" class="card p-4 shadow-sm">
+                    <input type="hidden" th:field="*{id}">
+                    <input type="hidden" th:field="*{usedCount}">
+
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Coupon Code</label>
+                        <input type="text" class="form-control" id="code" th:field="*{code}" required
+                            style="text-transform: uppercase;">
+                        <div class="form-text">Unique code for the coupon (e.g., BLACKFRIDAY).</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="discountType" class="form-label">Discount Type</label>
+                            <select class="form-select" id="discountType" th:field="*{discountType}">
+                                <option value="PERCENT">Percent (%)</option>
+                                <option value="AMOUNT">Fixed Amount (VND)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="discountValue" class="form-label">Discount Value</label>
+                            <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}"
+                                required min="0">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="startDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="startDate" th:field="*{startDate}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate" th:field="*{endDate}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="usageLimit" class="form-label">Usage Limit</label>
+                        <input type="number" class="form-control" id="usageLimit" th:field="*{usageLimit}" min="1">
+                        <div class="form-text">Maximum number of times this coupon can be used. Leave empty for
+                            unlimited.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save Coupon</button>
+                    <a href="/admin/coupons" class="btn btn-secondary ms-2">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

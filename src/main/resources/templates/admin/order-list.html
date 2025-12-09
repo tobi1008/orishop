@@ -25,7 +25,9 @@
                     <tr th:each="order : ${orders}">
                         <td th:text="${order.id}">#123</td>
                         <td th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}">Date</td>
-                        <td th:text="${order.user != null ? order.user.fullName : 'Khách lẻ'}">Customer</td>
+                        <td
+                            th:text="${order.shippingName != null ? order.shippingName : (order.user != null ? order.user.fullName : 'Khách lẻ')}">
+                            Customer</td>
                         <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">Total
                         </td>
                         <td>
@@ -33,6 +35,8 @@
                         </td>
                         <td>
                             <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">Chi tiết</a>
+                            <a th:href="@{/admin/orders/delete/{id}(id=${order.id})}" class="btn btn-sm btn-danger"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">Xóa</a>
                         </td>
                     </tr>
                     <tr th:if="${orders.isEmpty()}">

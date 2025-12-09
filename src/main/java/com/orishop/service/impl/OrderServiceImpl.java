@@ -29,11 +29,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order placeOrder(User user, List<CartItem> cartItems, String shippingName, String shippingPhone,
-            String shippingAddress, String note) {
+            String shippingAddress, String note, String couponCode, BigDecimal discountAmount) {
         // 1. Tính tổng tiền
         BigDecimal totalAmount = cartItems.stream()
                 .map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Trừ giảm giá nếu có
+        if (discountAmount != null) {
+            totalAmount = totalAmount.subtract(discountAmount);
+        }
 
         // 2. Tạo Order
         Order order = new Order();
@@ -41,8 +46,11 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingName(shippingName);
         order.setShippingPhone(shippingPhone);
         order.setShippingAddress(shippingAddress);
-        // order.setNote(note); // Nếu Entity Order có field note
+        order.setShippingAddress(shippingAddress);
+        order.setNote(note);
         order.setTotalAmount(totalAmount);
+        order.setCouponCode(couponCode);
+        order.setDiscountAmount(discountAmount);
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentMethod("COD"); // Mặc định COD
         // order.setCreatedAt(LocalDateTime.now()); // Đã có @PrePersist xử lý
@@ -65,5 +73,14 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return savedOrder;
+    }
+
+    public List<Order> getOrdersByUser(Long userId) {
+        return orderRepository.findByUserId(userId);
+    }
+
+    @Override
+    public void deleteOrder(Long id) {
+        orderRepository.deleteById(id);
     }
 }
