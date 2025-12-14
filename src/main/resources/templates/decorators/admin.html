@@ -46,7 +46,7 @@
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="/admin">OriShop Admin</a>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <form action="/auth/logout" method="post" class="d-inline">
+                <form th:action="@{/auth/logout}" method="post" class="d-inline">
                     <button class="nav-link px-3 bg-dark border-0" type="submit">Sign out</button>
                 </form>
             </div>
@@ -72,6 +72,8 @@
                                 Reviews</a></li>
                         <li class="nav-item"><a class="nav-link" href="/admin/coupons"><i class="fa fa-ticket"></i>
                                 Coupons</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/admin/flash-sales"><i class="fa fa-bolt"></i>
+                                Flash Sales</a></li>
                     </ul>
                 </div>
             </nav>

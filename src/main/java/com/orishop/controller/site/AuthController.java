@@ -20,7 +20,10 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/login")
-    public String loginPage() {
+    public String loginPage(jakarta.servlet.http.HttpServletRequest request) {
+        // Force session creation to avoid 500 error when header flushes buffer before
+        // CSRF token generation
+        request.getSession(true);
         return "auth/login";
     }
 

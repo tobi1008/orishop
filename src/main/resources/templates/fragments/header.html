@@ -2,88 +2,147 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <body>
-    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fa-solid fa-spa"></i> OriShop
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown">
-                            Sản phẩm
-                        </a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/product">Tất cả sản phẩm</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li th:each="cat : ${globalCategories}">
-                                <a class="dropdown-item"
-                                    th:href="@{/category/{slug}(slug=${cat.slug != null && cat.slug != '' ? cat.slug : cat.id})}"
-                                    th:text="${cat.name}">Category Name</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+    <header th:fragment="navbar" class="sticky-top shadow-sm">
+        <!-- Top Row: Logo, Menu, Icons (Pink Background) -->
+        <div class="bg-pink text-white py-2" style="background-color: #fce4ec; color: #333 !important;">
+            <div class="container">
+                <div class="d-flex align-items-center justify-content-between">
+                    <!-- Logo -->
+                    <a class="navbar-brand text-decoration-none d-flex align-items-center" href="/">
+                        <div class="bg-white rounded-circle p-1 d-flex align-items-center justify-content-center me-2"
+                            style="width: 40px; height: 40px;">
+                            <i class="fa-solid fa-spa text-pink" style="color: #ec407a;"></i>
+                        </div>
+                        <span class="h4 fw-bold mb-0 text-dark" style="color: #ec407a !important;">OriShop</span>
+                    </a>
 
-                <form class="d-flex me-3" action="/product/search" method="get">
-                    <input class="form-control me-2" type="search" name="keyword" placeholder="Tìm kiếm..."
-                        aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit"><i class="fa fa-search"></i></button>
-                </form>
+                    <!-- Main Navigation -->
+                    <ul class="nav d-none d-lg-flex">
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;" href="/">TRANG
+                                CHỦ</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;"
+                                href="/product">DANH MỤC</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;"
+                                href="/about">THƯƠNG HIỆU</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;"
+                                href="/contact">LIÊN HỆ</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;" href="/orders">TRA
+                                CỨU ĐƠN HÀNG</a></li>
+                    </ul>
 
-                <ul class="navbar-nav">
-                    <li class="nav-item me-2">
-                        <a class="nav-link position-relative" href="/cart">
-                            <i class="fa fa-shopping-cart fa-lg"></i>
+                    <!-- Icons: User & Cart -->
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- User Info (Visible when logged in) -->
+                        <div sec:authorize="isAuthenticated()" class="d-none d-md-block text-end me-1">
+                            <span class="small d-block text-muted">Xin chào,</span>
+                            <span sec:authentication="name" class="fw-bold" style="color: #ec407a;">User</span>
+                        </div>
+
+                        <!-- User Icon -->
+                        <div class="dropdown">
+                            <a class="text-decoration-none fs-5" href="#" id="userDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false" style="color: #ec407a;">
+                                <i class="fa-regular fa-user"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 rounded-3"
+                                aria-labelledby="userDropdown">
+                                <th:block sec:authorize="isAuthenticated()">
+                                    <li><a class="dropdown-item py-2" href="/profile"><i
+                                                class="fa-solid fa-id-card me-2 text-muted"></i>Hồ sơ cá nhân</a></li>
+                                    <li><a class="dropdown-item py-2" href="/orders"><i
+                                                class="fa-solid fa-box-open me-2 text-muted"></i>Đơn mua</a></li>
+                                    <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item py-2 text-danger"
+                                            href="/admin"><i class="fa-solid fa-user-shield me-2"></i>Trang Quản Trị</a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li>
+                                        <form th:action="@{/auth/logout}" method="post">
+                                            <button class="dropdown-item py-2 text-danger" type="submit"><i
+                                                    class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất</button>
+                                        </form>
+                                    </li>
+                                </th:block>
+                                <th:block sec:authorize="!isAuthenticated()">
+                                    <li><a class="dropdown-item py-2" href="/auth/login"><i
+                                                class="fa-solid fa-right-to-bracket me-2 text-muted"></i>Đăng nhập</a>
+                                    </li>
+                                    <li><a class="dropdown-item py-2" href="/auth/register"><i
+                                                class="fa-solid fa-user-plus me-2 text-muted"></i>Đăng ký</a></li>
+                                </th:block>
+                            </ul>
+                        </div>
+
+                        <!-- Cart Icon -->
+                        <a href="/cart" class="text-decoration-none position-relative fs-5" style="color: #ec407a;">
+                            <i class="fa-solid fa-cart-shopping"></i>
                             <span
-                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark text-white border border-light"
+                                style="font-size: 0.6rem; padding: 0.35em 0.5em;"
                                 th:text="${session.cartCount != null ? session.cartCount : 0}">
                                 0
                             </span>
                         </a>
-                    </li>
 
-                    <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="nav-link" href="/auth/register">Đăng ký</a>
-                    </li>
-                    <li class="nav-item" sec:authorize="!isAuthenticated()">
-                        <a class="btn btn-primary ms-2" href="/auth/login">Đăng nhập</a>
-                    </li>
-
-                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                            data-bs-toggle="dropdown">
-                            <i class="fa fa-user-circle"></i> <span sec:authentication="name">User</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/profile">Hồ sơ cá nhân</a></li>
-                            <li><a class="dropdown-item" href="/orders">Đơn mua</a></li>
-                            <li sec:authorize="hasRole('ADMIN')">
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item text-danger"
-                                    href="/admin">Trang Quản Trị</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li>
-                                <form th:action="@{/auth/logout}" method="post">
-                                    <button class="dropdown-item" type="submit">Đăng xuất</button>
-                                </form>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+                        <!-- Mobile Menu Button -->
+                        <button class="navbar-toggler d-lg-none border-0 ms-2" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#mobileNav" style="color: #ec407a;">
+                            <i class="fa-solid fa-bars fs-4"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
+
+        <!-- Second Row: Search Bar (White Background) -->
+        <div class="bg-white py-3 border-bottom">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <form action="/product/search" method="get">
+                            <div class="input-group">
+                                <input type="search"
+                                    class="form-control rounded-start-pill ps-4 border-end-0 border-secondary-subtle"
+                                    name="keyword" placeholder="Bạn muốn mua gì?" aria-label="Search">
+                                <button class="btn btn-danger text-white rounded-end-pill px-4" type="submit"
+                                    style="background-color: #ec407a; border-color: #ec407a;">
+                                    Tìm kiếm
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Mobile Navigation Collapse -->
+                <div class="collapse d-lg-none mt-3" id="mobileNav">
+                    <div class="card card-body border-0 bg-light">
+                        <ul class="nav flex-column">
+                            <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/product">Danh mục</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/about">Thương hiệu</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/orders">Tra cứu đơn hàng</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .text-pink {
+                color: #ec407a !important;
+            }
+
+            .bg-pink {
+                background-color: #fce4ec !important;
+            }
+
+            .nav-link:hover {
+                opacity: 0.8;
+            }
+        </style>
+    </header>
 </body>
 
 </html>

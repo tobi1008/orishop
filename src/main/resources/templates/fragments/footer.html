@@ -1,30 +1,99 @@
-<footer th:fragment="footer" class="footer mt-auto py-3 bg-dark text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-4">
-                <h5>OriShop Cosmetic</h5>
-                <p>Mang vẻ đẹp tự nhiên đến cho bạn. Sản phẩm chính hãng 100%.</p>
-            </div>
-            <div class="col-md-4">
-                <h5>Liên kết</h5>
-                <ul class="list-unstyled text-small">
-                    <li><a class="text-muted" href="#">Chính sách đổi trả</a></li>
-                    <li><a class="text-muted" href="#">Hướng dẫn mua hàng</a></li>
-                    <li><a class="text-muted" href="#">Liên hệ</a></li>
-                </ul>
-            </div>
-            <div class="col-md-4">
-                <h5>Đăng ký nhận tin</h5>
-                <form>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" placeholder="Email của bạn">
-                        <button class="btn btn-primary" type="button">Gửi</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-        <div class="text-center pt-3 border-top border-secondary">
-            <span class="text-muted">© 2024 OriShop. All rights reserved.</span>
-        </div>
-    </div>
+<footer th:fragment="footer" class="bg-white border-top mt-auto pt-5">
+	<div class="container pb-4">
+		<div class="row g-4">
+			<!-- Column 1: Logo & Disclaimer -->
+			<div class="col-lg-5 col-md-6">
+				<a href="/"
+					class="d-flex align-items-center text-decoration-none mb-3">
+					<div
+						class="bg-pink rounded-circle p-2 d-flex align-items-center justify-content-center me-2"
+						style="width: 50px; height: 50px; background-color: #ec407a;">
+						<i class="fa-solid fa-spa fa-lg text-white"></i>
+					</div>
+					<div>
+						<h4 class="fw-bold mb-0 text-dark"
+							style="color: #ec407a !important;">OriShop</h4>
+						<span class="small text-muted" style="letter-spacing: 2px;">BEAUTY
+							& COSMETICS</span>
+					</div>
+				</a>
+
+				<div class="text-muted small lh-lg"
+					style="font-size: 0.9rem; text-align: justify;">
+					<p class="mb-2">
+						<strong>OriShop</strong> cung cấp thông tin giá, mô tả, hình ảnh
+						và thông tin chi tiết của sản phẩm Chăm sóc da mặt, Chăm sóc cơ
+						thể, Trang điểm, Chăm sóc tóc và da đầu, Nước hoa, Bộ sản phẩm làm
+						đẹp, Mỹ phẩm nam, Mỹ Phẩm Khác...
+					</p>
+					<p class="mb-2">Với nhiều mặt hàng bộ dưỡng da, set dưỡng da,
+						set trắng da innisfree, bộ trang điểm, bộ chăm sóc da mặt, set
+						dưỡng da, vichy chính hãng, tẩy tế bào chết da mặt, sữa rửa mặt,
+						kem dưỡng ẩm... từ các sàn thương mại điện tử uy tín, nhằm giúp
+						khách hàng lựa chọn sản phẩm phù hợp với giá tốt nhất.</p>
+				</div>
+			</div>
+
+			<!-- Column 2: Categories -->
+			<div class="col-lg-3 col-md-6">
+				<h6 class="fw-bold mb-3 text-dark">Danh Mục Sản Phẩm</h6>
+				<ul class="list-unstyled text-muted small lh-lg">
+					<li th:each="cat : ${globalCategories}"><a
+						th:href="@{/category/{slug}(slug=${cat.slug != null && cat.slug != '' ? cat.slug : cat.id})}"
+						class="text-decoration-none text-muted cat-link"
+						th:text="${cat.name}">Category Name</a></li>
+					<!-- Static Fallback if cat is empty -->
+					<li
+						th:if="${globalCategories == null || globalCategories.isEmpty()}"><a
+						href="#" class="text-decoration-none text-muted cat-link">Chăm
+							sóc da mặt</a></li>
+
+				</ul>
+			</div>
+
+			<!-- Column 3: About & Contact -->
+			<div class="col-lg-4 col-md-12">
+				<div class="mb-4">
+					<h6 class="fw-bold mb-3 text-dark">Về OriShop</h6>
+					<ul class="list-unstyled text-muted small lh-lg">
+						<li><a href="/about"
+							class="text-decoration-none text-muted cat-link">Giới thiệu</a></li>
+						<li><a href="/contact"
+							class="text-decoration-none text-muted cat-link">Liên hệ</a></li>
+						<li><a href="#"
+							class="text-decoration-none text-muted cat-link">Chính sách
+								bảo mật</a></li>
+						<li><a href="#"
+							class="text-decoration-none text-muted cat-link">Điều khoản
+								sử dụng</a></li>
+					</ul>
+				</div>
+
+				<div>
+					<h6 class="fw-bold mb-3 text-dark">Liên hệ</h6>
+					<ul class="list-unstyled text-muted small lh-base">
+						<li class="mb-2"><strong>Địa chỉ:</strong> <span
+							class="fw-bold text-dark">OriShop</span>, 1 Võ Văn Ngân,
+							Linh Chiểu, Thủ Đức, TP. Hồ Chí Minh</li>
+						<li><strong>Email:</strong> <a
+							href="mailto:info@TheFaceHolic.com"
+							class="text-decoration-none text-dark">contact@orishop.com</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Copyright Bar -->
+	<div class="py-3 text-center small"
+		style="background-color: #f8f9fa; color: #506677;">OriShop
+		© 2025 - Mỹ phẩm và sản phẩm làm đẹp chính hãng</div>
+
+	<style>
+.cat-link:hover {
+	color: #ec407a !important;
+	text-decoration: underline !important;
+}
+</style>
 </footer>

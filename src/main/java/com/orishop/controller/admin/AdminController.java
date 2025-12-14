@@ -15,12 +15,12 @@ import com.orishop.service.impl.ProductService;
 import com.orishop.service.ReviewService;
 import com.orishop.service.CouponService;
 import com.orishop.model.Coupon;
-import org.springframework.format.annotation.DateTimeFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.List;
 import java.text.Normalizer;
@@ -295,7 +295,8 @@ public class AdminController {
         String nowhitespace = input.trim().replaceAll("\\s+", "-");
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
-        return pattern.matcher(normalized).replaceAll("").toLowerCase();
+        String slug = pattern.matcher(normalized).replaceAll("");
+        return slug.toLowerCase().replaceAll("đ", "d").replaceAll("Đ", "d");
     }
 
     // --- Reviews ---
@@ -348,5 +349,80 @@ public class AdminController {
     public String deleteCoupon(@PathVariable Long id) {
         couponService.deleteCoupon(id);
         return "redirect:/admin/coupons";
+    }
+
+    // --- Flash Sales ---
+    @Autowired
+    private com.orishop.service.FlashSaleService flashSaleService;
+
+    @GetMapping("/flash-sales")
+    public String flashSaleList(Model model) {
+        model.addAttribute("flashSales", flashSaleService.getAllFlashSales());
+        return "admin/flash-sale-list";
+    }
+
+    @GetMapping("/flash-sales/new")
+    public String createFlashSaleForm(Model model) {
+        model.addAttribute("flashSale", new com.orishop.model.FlashSale());
+        return "admin/flash-sale-form";
+    }
+
+    @GetMapping("/flash-sales/edit/{id}")
+    public String editFlashSaleForm(@PathVariable Long id, Model model) {
+        com.orishop.model.FlashSale flashSale = flashSaleService.getFlashSaleById(id);
+        if (flashSale == null) {
+            return "redirect:/admin/flash-sales";
+        }
+        model.addAttribute("flashSale", flashSale);
+        return "admin/flash-sale-form";
+    }
+
+    @PostMapping("/flash-sales")
+    public String saveFlashSale(@ModelAttribute com.orishop.model.FlashSale flashSale) {
+        flashSaleService.saveFlashSale(flashSale);
+        return "redirect:/admin/flash-sales";
+    }
+
+    @GetMapping("/flash-sales/delete/{id}")
+    public String deleteFlashSale(@PathVariable Long id) {
+        flashSaleService.deleteFlashSale(id);
+        return "redirect:/admin/flash-sales";
+    }
+
+    @GetMapping("/flash-sales/{id}/products")
+    public String flashSaleProducts(@PathVariable Long id, Model model) {
+        com.orishop.model.FlashSale flashSale = flashSaleService.getFlashSaleById(id);
+        if (flashSale == null) {
+            return "redirect:/admin/flash-sales";
+        }
+        model.addAttribute("flashSale", flashSale);
+        model.addAttribute("products", productService.getAllProducts()); // For selection
+        model.addAttribute("categories", categoryRepository.findAll()); // For category selection
+        return "admin/flash-sale-products";
+    }
+
+    @PostMapping("/flash-sales/{id}/products")
+    public String addProductToFlashSale(@PathVariable Long id,
+            @RequestParam(required = false) Long productId,
+            @RequestParam(required = false) BigDecimal salePrice,
+            @RequestParam(defaultValue = "FIXED") String discountType,
+            @RequestParam(required = false) Double discountValue) {
+
+        flashSaleService.addProductToFlashSale(id, productId, salePrice, discountType, discountValue);
+        return "redirect:/admin/flash-sales/" + id + "/products";
+    }
+
+    @PostMapping("/flash-sales/{id}/add-category")
+    public String addCategoryToFlashSale(@PathVariable Long id,
+            @RequestParam Long categoryId,
+            @RequestParam Double discountPercent) {
+        flashSaleService.addCategoryToFlashSale(id, categoryId, discountPercent);
+        return "redirect:/admin/flash-sales/" + id + "/products";
+    }
+
+    @GetMapping("/flash-sales/products/remove/{id}")
+    public String removeProductFromFlashSale(@PathVariable Long id, @RequestParam Long flashSaleId) {
+        flashSaleService.removeProductFromFlashSale(id);
+        return "redirect:/admin/flash-sales/" + flashSaleId + "/products";
     }
 }

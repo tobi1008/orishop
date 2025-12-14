@@ -7,54 +7,248 @@
 </head>
 
 <body>
-    <div layout:fragment="content">
-        <!-- Banner -->
-        <div class="p-5 mb-4 bg-light rounded-3 jumbotron text-white"
-            style="background: linear-gradient(135deg, #d63384, #fd7e14);">
-            <div class="container-fluid py-5">
-                <h1 class="display-5 fw-bold">OriShop Winter Sale</h1>
-                <p class="col-md-8 fs-4">Giảm giá lên đến 50% các sản phẩm son môi và dưỡng da. Mua ngay để nhận ưu đãi
-                    đặc
-                    biệt.</p>
-                <button class="btn btn-light btn-lg text-danger" type="button">Mua ngay</button>
+    <div layout:fragment="content" class="bg-light pb-5">
+
+        <!-- Main Section: Sidebar & Banner -->
+        <div class="container py-4">
+            <div class="row g-4">
+                <!-- Sidebar Categories -->
+                <div class="col-lg-3 d-none d-lg-block">
+                    <div class="bg-white rounded shadow-sm overflow-hidden h-100">
+                        <div class="bg-white border-bottom p-3">
+                            <h6 class="fw-bold mb-0 text-uppercase"><i class="fa-solid fa-bars me-2"></i> Danh Mục</h6>
+                        </div>
+                        <ul class="list-group list-group-flush border-0">
+                            <!-- Category Item Loop -->
+                            <a th:each="cat : ${globalCategories}"
+                                th:href="@{/category/{slug}(slug=${cat.slug != null && cat.slug != '' ? cat.slug : cat.id})}"
+                                class="list-group-item list-group-item-action border-0 py-2 px-3 d-flex align-items-center justify-content-between text-muted">
+                                <span>
+                                    <!-- Random icons for demo or use cat.image if available -->
+                                    <span th:if="${cat.name.contains('Son')}" class="me-2 text-danger"><i
+                                            class="fa-solid fa-lips"></i></span>
+                                    <span th:if="${cat.name.contains('Da')}" class="me-2 text-info"><i
+                                            class="fa-regular fa-face-smile"></i></span>
+                                    <span th:if="${!cat.name.contains('Son') && !cat.name.contains('Da')}"
+                                        class="me-2 text-warning"><i class="fa-solid fa-star"></i></span>
+                                    <span th:text="${cat.name}">Category Name</span>
+                                </span>
+                                <i class="fa-solid fa-chevron-right text-light small"></i>
+                            </a>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Banner Area -->
+                <div class="col-lg-9">
+                    <!-- Carousel -->
+                    <div id="mainBannerCarousel" class="carousel slide shadow-sm rounded overflow-hidden"
+                        data-bs-ride="carousel">
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to="0"
+                                class="active" aria-current="true"></button>
+                            <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to="1"></button>
+                            <button type="button" data-bs-target="#mainBannerCarousel" data-bs-slide-to="2"></button>
+                        </div>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <div class="p-5 d-flex align-items-center justify-content-center text-white"
+                                    style="height: 350px; background: linear-gradient(135deg, #f48fb1, #f06292);">
+                                    <div class="text-center">
+                                        <h2 class="display-5 fw-bold mb-3">Săn Sale Mỗi Ngày</h2>
+                                        <p class="fs-5 mb-4">Giảm giá lên đến 50% cho các sản phẩm hot nhất</p>
+                                        <button class="btn btn-light rounded-pill px-4 fw-bold text-pink">Xem
+                                            Ngay</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="p-5 d-flex align-items-center justify-content-center text-white"
+                                    style="height: 350px; background: linear-gradient(135deg, #4fc3f7, #29b6f6);">
+                                    <div class="text-center">
+                                        <h2 class="display-5 fw-bold mb-3">Chăm Sóc Da Mùa Hè</h2>
+                                        <p class="fs-5 mb-4">Combo dưỡng ẩm & chống nắng hiệu quả</p>
+                                        <button class="btn btn-light rounded-pill px-4 fw-bold text-info">Khám
+                                            Phá</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="p-5 d-flex align-items-center justify-content-center text-white"
+                                    style="height: 350px; background: linear-gradient(135deg, #ffb74d, #ffa726);">
+                                    <div class="text-center">
+                                        <h2 class="display-5 fw-bold mb-3">Bộ Sưu Tập Mới</h2>
+                                        <p class="fs-5 mb-4">Xu hướng trang điểm năm 2024</p>
+                                        <button class="btn btn-light rounded-pill px-4 fw-bold text-warning">Mua
+                                            Ngay</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#mainBannerCarousel"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#mainBannerCarousel"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+
+                    <!-- Service Icons Below Banner -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center bg-white p-3 rounded shadow-sm h-100">
+                                <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3 text-primary">
+                                    <i class="fa-solid fa-truck-fast fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Giao hàng tận nơi</h6>
+                                    <p class="text-muted small mb-0">Miễn phí ship đơn từ 500k</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center bg-white p-3 rounded shadow-sm h-100">
+                                <div class="rounded-circle bg-success bg-opacity-10 p-3 me-3 text-success">
+                                    <i class="fa-solid fa-rotate-left fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Đổi trả dễ dàng</h6>
+                                    <p class="text-muted small mb-0">Trong vòng 7 ngày</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-center bg-white p-3 rounded shadow-sm h-100">
+                                <div class="rounded-circle bg-warning bg-opacity-10 p-3 me-3 text-warning">
+                                    <i class="fa-solid fa-check-double fa-lg"></i>
+                                </div>
+                                <div>
+                                    <h6 class="fw-bold mb-1">Giá rẻ nhất</h6>
+                                    <p class="text-muted small mb-0">Cam kết chính hãng</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- Flash Sale Section -->
+        <div class="container mb-4" th:if="${activeFlashSales != null && !activeFlashSales.isEmpty()}">
+            <!-- (Giữ nguyên code Flash Sale cũ, chỉ chỉnh lại style nếu cần) -->
+            <div class="alert alert-warning border-2 border-danger shadow-sm d-flex align-items-center justify-content-between flex-wrap"
+                style="background: #fff3f3;">
+                <div class="d-flex align-items-center">
+                    <i class="fa fa-bolt fa-2x text-danger me-3"></i>
+                    <div>
+                        <h4 class="mb-0 text-danger fw-bold text-uppercase">Flash Sale Đang Diễn Ra!</h4>
+                        <p class="mb-0" th:text="${activeFlashSales[0].name}">Golden Hour</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mt-2 mt-md-0">
+                    <span class="me-2 fw-bold">Kết thúc sau:</span>
+                    <div class="h4 mb-0 fw-bold text-danger" id="flash-sale-timer">00:00:00</div>
+                    <script th:inline="javascript">
+                        (function () {
+                            const endTime = [[${ activeFlashSales[0].endTime.time }]];
+
+                            function updateTimer() {
+                                const now = new Date().getTime();
+                                const distance = endTime - now;
+
+                                if (distance < 0) {
+                                    document.getElementById("flash-sale-timer").innerHTML = "Đã kết thúc";
+                                    return;
+                                }
+
+                                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                                document.getElementById("flash-sale-timer").innerHTML =
+                                    (hours < 10 ? "0" + hours : hours) + ":" +
+                                    (minutes < 10 ? "0" + minutes : minutes) + ":" +
+                                    (seconds < 10 ? "0" + seconds : seconds);
+                            }
+
+                            setInterval(updateTimer, 1000);
+                            updateTimer();
+                        })();
+                    </script>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product List Section -->
         <div class="container">
-            <div class="row mb-3">
-                <h2 class="text-center text-uppercase text-secondary">Sản phẩm nổi bật</h2>
-                <hr>
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="text-uppercase fw-bold text-dark border-start border-4 border-danger ps-3 mb-0">Mới cập nhật
+                </h3>
+                <a href="/product" class="btn btn-outline-danger rounded-pill px-4 btn-sm">Xem tất cả</a>
             </div>
 
-            <div class="row row-cols-1 row-cols-md-3 g-4">
+            <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
                 <!-- Loop products -->
                 <div class="col" th:each="product : ${products}">
-                    <div class="card h-100 card-product shadow-sm border-0">
-                        <img th:src="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
-                            class="card-img-top" alt="Product Image" style="height: 250px; object-fit: cover;">
-                        <div class="card-body">
-                            <h5 class="card-title text-truncate" th:text="${product.name}">Tên sản phẩm</h5>
-                            <p class="card-text text-danger fw-bold"
-                                th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                                500.000 đ
-                            </p>
-                        </div>
-                        <div class="card-footer bg-transparent border-top-0 d-grid gap-2">
+                    <div class="card h-100 card-product shadow-sm border-0 position-relative group-hover">
+
+                        <!-- Badges -->
+                        <span th:if="${product.flashSalePrice != null}"
+                            class="position-absolute top-0 start-0 badge bg-danger m-2">-<span
+                                th:text="${#numbers.formatInteger((1 - product.flashSalePrice/product.price) * 100, 0)}"></span>%</span>
+
+                        <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                            class="text-decoration-none">
+                            <img th:src="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
+                                class="card-img-top" alt="Product Image" style="height: 180px; object-fit: cover;">
+                        </a>
+
+                        <div class="card-body p-2 d-flex flex-column">
                             <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
-                                class="btn btn-outline-secondary">Chi
-                                tiết</a>
-                            <a th:href="@{/cart/add/{id}(id=${product.id})}" class="btn btn-primary"><i
-                                    class="fa fa-cart-plus"></i> Thêm vào giỏ</a>
+                                class="text-decoration-none text-dark">
+                                <h6 class="card-title text-truncate mb-1" th:text="${product.name}"
+                                    style="font-size: 0.9rem;">Tên sản phẩm</h6>
+                            </a>
+
+                            <div class="mt-auto">
+                                <div th:if="${product.flashSalePrice != null}">
+                                    <p class="text-danger fw-bold mb-0" style="font-size: 1rem;"
+                                        th:text="${#numbers.formatDecimal(product.flashSalePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        400.000 đ
+                                    </p>
+                                    <small class="text-muted text-decoration-line-through" style="font-size: 0.8rem;"
+                                        th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        500.000 đ
+                                    </small>
+                                </div>
+
+                                <p th:unless="${product.flashSalePrice != null}" class="text-danger fw-bold mb-0"
+                                    style="font-size: 1rem;"
+                                    th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    500.000 đ
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-top-0 p-2">
+                            <a th:href="@{/cart/add/{id}(id=${product.id})}"
+                                class="btn btn-outline-danger w-100 btn-sm rounded-1">Chi tiết</a>
                         </div>
                     </div>
                 </div>
 
                 <!-- Empty state -->
                 <div th:if="${products == null || products.isEmpty()}" class="col-12 text-center py-5">
-                    <p>Chưa có sản phẩm nào. Vui lòng quay lại sau.</p>
+                    <p class="text-muted">Chưa có sản phẩm nào. Vui lòng quay lại sau.</p>
                 </div>
             </div>
         </div>
+
+    </div>
 </body>
 
 </html>

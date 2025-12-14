@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Sản phẩm Flash Sale - OriShop Admin</title>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Sản phẩm trong: <span th:text="${flashSale.name}" class="text-primary"></span></h1>
+            <div class="btn-toolbar mb-2 mb-md-0">
+                <a href="/admin/flash-sales" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa fa-arrow-left"></i> Quay lại DS
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Form thêm sản phẩm -->
+            <!-- Form thêm sản phẩm (Single) -->
+            <div class="col-md-6">
+                <!-- Add Single Product -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">Thêm 1 Sản phẩm</div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/flash-sales/{id}/products(id=${flashSale.id})}" method="post">
+                            <div class="mb-3">
+                                <label for="product" class="form-label">Chọn sản phẩm</label>
+                                <select name="productId" class="form-select" required>
+                                    <option value="">-- Chọn sản phẩm --</option>
+                                    <option th:each="product : ${products}" th:value="${product.id}"
+                                        th:text="${product.name} + ' (Giá gốc: ' + ${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ)'">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Loại giảm giá:</label>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="discountType" id="typeFixed"
+                                        value="FIXED" checked onclick="toggleDiscountInput('FIXED')">
+                                    <label class="form-check-label" for="typeFixed">Giá cố định</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="discountType" id="typePercent"
+                                        value="PERCENT" onclick="toggleDiscountInput('PERCENT')">
+                                    <label class="form-check-label" for="typePercent">Theo phần trăm (%)</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="inputFixed">
+                                <label for="salePrice" class="form-label">Giá Sale (đ)</label>
+                                <input type="number" name="salePrice" class="form-control" min="0">
+                            </div>
+
+                            <div class="mb-3 d-none" id="inputPercent">
+                                <label for="discountValue" class="form-label">Phần trăm giảm (%)</label>
+                                <input type="number" name="discountValue" class="form-control" min="1" max="100">
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100">Thêm sản phẩm</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Add Category -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">Thêm theo Danh mục</div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/flash-sales/{id}/add-category(id=${flashSale.id})}" method="post">
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Chọn Danh mục</label>
+                                <select name="categoryId" class="form-select" required>
+                                    <option value="">-- Chọn danh mục --</option>
+                                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Giảm giá cho toàn bộ danh mục (%):</label>
+                                <input type="number" name="discountPercent" class="form-control" min="1" max="100"
+                                    required>
+                            </div>
+                            <button type="submit" class="btn btn-info text-white w-100">Thêm cả danh mục</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function toggleDiscountInput(type) {
+                    if (type === 'FIXED') {
+                        document.getElementById('inputFixed').classList.remove('d-none');
+                        document.getElementById('inputPercent').classList.add('d-none');
+                    } else {
+                        document.getElementById('inputFixed').classList.add('d-none');
+                        document.getElementById('inputPercent').classList.remove('d-none');
+                    }
+                }
+            </script>
+
+            <!-- Danh sách sản phẩm đã thêm -->
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-bordered bg-white">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Giá gốc</th>
+                                <th>Giá Sale</th>
+                                <th>Giảm (%)</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="item : ${flashSale.flashSaleProducts}">
+                                <td>
+                                    <img th:if="${item.product.images != null && !item.product.images.isEmpty()}"
+                                        th:src="${item.product.images[0].imageUrl}"
+                                        style="width: 50px; height: 50px; object-fit: cover;">
+                                </td>
+                                <td th:text="${item.product.name}">Product Name</td>
+                                <td th:text="${item.product.category != null ? item.product.category.name : 'N/A'}">
+                                    Category</td>
+                                <td
+                                    th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    100.000</td>
+                                <td class="text-danger fw-bold"
+                                    th:text="${#numbers.formatDecimal(item.salePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    80.000</td>
+                                <td>
+                                    <span class="badge bg-danger"
+                                        th:with="discount=${(item.product.price - item.salePrice) * 100.0 / item.product.price}"
+                                        th:text="'-' + ${#numbers.formatInteger(discount, 0)} + '%'">
+                                        -20%
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/flash-sales/products/remove/{id}(id=${item.id}, flashSaleId=${flashSale.id})}"
+                                        class="btn btn-sm btn-danger"
+                                        onclick="return confirm('Xóa sản phẩm này khỏi chương trình sale?');">Xóa</a>
+                                </td>
+                            </tr>
+                            <tr th:if="${flashSale.flashSaleProducts.isEmpty()}">
+                                <td colspan="7" class="text-center text-muted">Chưa có sản phẩm nào trong chương trình
+                                    này.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

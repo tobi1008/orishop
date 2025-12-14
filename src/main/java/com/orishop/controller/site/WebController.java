@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Controller
 @RequiredArgsConstructor
@@ -25,10 +26,14 @@ public class WebController {
     private final com.orishop.service.OrderService orderService;
     private final ReviewService reviewService;
     private final UserRepository userRepository;
+    private final com.orishop.repository.ContactRepository contactRepository;
 
     @GetMapping("/")
     public String home(Model model) {
-        model.addAttribute("products", productService.getAllProducts());
+        java.util.List<Product> products = productService.getAllProducts();
+        populateFlashSaleInfo(products);
+        model.addAttribute("products", products);
+        model.addAttribute("activeFlashSales", flashSaleService.findActiveFlashSales(new java.util.Date()));
         return "web/index"; // templates/web/index.html
     }
 
@@ -51,6 +56,10 @@ public class WebController {
 
         model.addAttribute("product", product);
         model.addAttribute("reviews", reviewService.getReviewsByProduct(product.getId()));
+
+        // Check flash sale for single product
+        populateFlashSaleInfo(java.util.List.of(product));
+
         return "web/product-detail";
     }
 
@@ -91,13 +100,17 @@ public class WebController {
 
     @GetMapping("/product")
     public String allProducts(Model model) {
-        model.addAttribute("products", productService.getAllProducts());
+        java.util.List<Product> products = productService.getAllProducts();
+        populateFlashSaleInfo(products);
+        model.addAttribute("products", products);
         return "web/product-list";
     }
 
     @GetMapping("/product/search")
     public String search(@RequestParam("keyword") String keyword, Model model) {
-        model.addAttribute("products", productService.searchProducts(keyword));
+        java.util.List<Product> products = productService.searchProducts(keyword);
+        populateFlashSaleInfo(products);
+        model.addAttribute("products", products);
         return "web/product-list";
     }
 
@@ -118,7 +131,9 @@ public class WebController {
             throw new RuntimeException("Category not found");
         }
 
-        model.addAttribute("products", productService.getProductsByCategory(category.getId()));
+        java.util.List<Product> products = productService.getProductsByCategory(category.getId());
+        populateFlashSaleInfo(products);
+        model.addAttribute("products", products);
         model.addAttribute("currentCategory", category);
         return "web/product-list";
     }
@@ -247,8 +262,62 @@ public class WebController {
         return "web/profile";
     }
 
+    @GetMapping("/contact")
+    public String contact() {
+        return "web/contact";
+    }
+
+    @GetMapping("/about")
+    public String about() {
+        return "web/about";
+    }
+
+    @PostMapping("/contact")
+    public String submitContact(@RequestParam String name,
+            @RequestParam String email,
+            @RequestParam String subject,
+            @RequestParam String message,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+
+        com.orishop.model.Contact contact = new com.orishop.model.Contact();
+        contact.setName(name);
+        contact.setEmail(email);
+        contact.setSubject(subject);
+        contact.setMessage(message);
+
+        contactRepository.save(contact);
+
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi sớm nhất có thể!");
+        return "redirect:/contact";
+    }
+
     @GetMapping("/checkout/success")
     public String checkoutSuccess() {
         return "web/checkout-success";
+    }
+
+    @Autowired
+    private com.orishop.service.FlashSaleService flashSaleService;
+
+    // Helper to populate sale info
+    private void populateFlashSaleInfo(java.util.List<Product> products) {
+        java.util.List<com.orishop.model.FlashSale> activeSales = flashSaleService
+                .findActiveFlashSales(new java.util.Date());
+        if (activeSales.isEmpty())
+            return;
+
+        for (Product p : products) {
+            for (com.orishop.model.FlashSale sale : activeSales) {
+                for (com.orishop.model.FlashSaleProduct fsp : sale.getFlashSaleProducts()) {
+                    if (fsp.getProduct().getId().equals(p.getId())) {
+                        if (p.getFlashSalePrice() == null || fsp.getSalePrice().compareTo(p.getFlashSalePrice()) < 0) {
+                            p.setFlashSalePrice(fsp.getSalePrice());
+                            p.setFlashSaleEndTime(sale.getEndTime());
+                        }
+                    }
+                }
+            }
+        }
     }
 }

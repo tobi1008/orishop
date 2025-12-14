@@ -20,6 +20,7 @@ public class CartService {
 
     private final ProductRepository productRepository;
     private final CouponService couponService;
+    private final com.orishop.service.FlashSaleService flashSaleService;
     private final HttpSession session;
     private static final String CART_SESSION_KEY = "CART";
     private static final String COUPON_SESSION_KEY = "COUPON_CODE";
@@ -39,13 +40,25 @@ public class CartService {
         } else {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new RuntimeException("Product not found"));
+
+            BigDecimal finalPrice = product.getPrice();
+            if (product.getDiscountPrice() != null) {
+                finalPrice = product.getDiscountPrice();
+            }
+
+            // Check Flash Sale
+            Optional<BigDecimal> flashSalePrice = flashSaleService.getFlashSalePrice(product);
+            if (flashSalePrice.isPresent()) {
+                finalPrice = flashSalePrice.get();
+            }
+
             CartItem newItem = new CartItem(
                     product.getId(),
                     product.getName(),
                     (product.getImages() != null && !product.getImages().isEmpty())
                             ? product.getImages().get(0).getImageUrl()
-                            : "placeholder.jpg",
-                    product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice(),
+                            : "https://dummyimage.com/300x300/dee2e6/6c757d.jpg",
+                    finalPrice,
                     quantity);
             cart.add(newItem);
         }

@@ -49,7 +49,23 @@
                 <h1 class="fw-bold mb-3" th:text="${product.name}">Tên sản phẩm</h1>
 
                 <div class="mb-3">
-                    <span class="h3 text-danger fw-bold"
+                    <div th:if="${product.flashSalePrice != null}">
+                        <span class="h2 text-danger fw-bold me-2"
+                            th:text="${#numbers.formatDecimal(product.flashSalePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">Sale
+                            Price</span>
+                        <span class="h4 text-muted text-decoration-line-through"
+                            th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Original
+                            Price</span>
+                        <div class="badge bg-danger ms-2 p-2">
+                            <i class="fa fa-bolt"></i> FLASH SALE
+                        </div>
+                        <div class="mt-2 text-primary" th:if="${product.flashSaleEndTime != null}">
+                            <i class="fa fa-clock"></i> Kết thúc lúc: <span
+                                th:text="${#dates.format(product.flashSaleEndTime, 'HH:mm dd/MM/yyyy')}"></span>
+                        </div>
+                    </div>
+
+                    <span th:unless="${product.flashSalePrice != null}" class="h3 text-danger fw-bold"
                         th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">500.000
                         đ</span>
                 </div>
@@ -107,7 +123,8 @@
                                 <label class="form-label">Đánh giá:</label>
                                 <div class="rating">
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="rating" id="star5" value="5" checked>
+                                        <input class="form-check-input" type="radio" name="rating" id="star5" value="5"
+                                            checked>
                                         <label class="form-check-label" for="star5">5 sao</label>
                                     </div>
                                     <div class="form-check form-check-inline">
@@ -149,7 +166,8 @@
                         </div>
                         <div class="mb-1 text-warning">
                             <span th:each="i : ${#numbers.sequence(1, review.rating)}"><i class="fa fa-star"></i></span>
-                            <span th:each="i : ${#numbers.sequence(review.rating + 1, 5)}" th:if="${review.rating < 5}"><i class="fa fa-star-o"></i></span>
+                            <span th:each="i : ${#numbers.sequence(review.rating + 1, 5)}"
+                                th:if="${review.rating < 5}"><i class="fa fa-star-o"></i></span>
                         </div>
                         <p class="mb-1" th:text="${review.comment}">Review Content</p>
                     </div>

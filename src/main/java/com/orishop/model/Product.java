@@ -49,6 +49,12 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Date createdAt;
 
+    @Transient
+    private BigDecimal flashSalePrice;
+
+    @Transient
+    private Date flashSaleEndTime;
+
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
