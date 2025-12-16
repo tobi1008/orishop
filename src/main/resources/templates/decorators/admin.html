@@ -58,28 +58,60 @@
             <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
                 <div class="position-sticky pt-3">
                     <ul class="nav flex-column">
-                        <li class="nav-item"><a class="nav-link active" href="/admin"><i class="fa fa-home"></i>
-                                Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/products"><i class="fa fa-box"></i>
-                                Products</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/categories"><i class="fa fa-list"></i>
-                                Categories</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/orders"><i
-                                    class="fa fa-shopping-cart"></i> Orders</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/users"><i class="fa fa-users"></i>
-                                Users</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/reviews"><i class="fa fa-star"></i>
-                                Reviews</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/coupons"><i class="fa fa-ticket"></i>
-                                Coupons</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/admin/flash-sales"><i class="fa fa-bolt"></i>
-                                Flash Sales</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin}"
+                                th:classappend="${requestURI == '/admin' ? 'active' : ''}">
+                                <i class="fa fa-home"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/products}"
+                                th:classappend="${requestURI.startsWith('/admin/products') ? 'active' : ''}">
+                                <i class="fa fa-box"></i> Products
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/categories}"
+                                th:classappend="${requestURI.startsWith('/admin/categories') ? 'active' : ''}">
+                                <i class="fa fa-list"></i> Categories
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/orders}"
+                                th:classappend="${requestURI.startsWith('/admin/orders') ? 'active' : ''}">
+                                <i class="fa fa-shopping-cart"></i> Orders
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/users}"
+                                th:classappend="${requestURI.startsWith('/admin/users') ? 'active' : ''}">
+                                <i class="fa fa-users"></i> Users
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/reviews}"
+                                th:classappend="${requestURI.startsWith('/admin/reviews') ? 'active' : ''}">
+                                <i class="fa fa-star"></i> Reviews
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/coupons}"
+                                th:classappend="${requestURI.startsWith('/admin/coupons') ? 'active' : ''}">
+                                <i class="fa fa-ticket"></i> Coupons
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/flash-sales}"
+                                th:classappend="${requestURI.startsWith('/admin/flash-sales') ? 'active' : ''}">
+                                <i class="fa fa-bolt"></i> Flash Sales
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>
 
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 mt-4" layout:fragment="content">
-                <!-- Nội dung trang admin sẽ được inject vào đây -->
+                <!-- Content will be injected here -->
             </main>
         </div>
     </div>

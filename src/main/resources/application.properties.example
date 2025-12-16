@@ -1,0 +1,43 @@
+# DATABASE
+spring.datasource.url=jdbc:mysql://localhost:3306/orishop?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+spring.datasource.username=root
+spring.datasource.password=12345678
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA / HIBERNATE
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+
+# THYMELEAF
+spring.thymeleaf.cache=false
+spring.thymeleaf.mode=HTML
+spring.thymeleaf.encoding=UTF-8
+
+# SERVER
+server.port=8091
+server.error.include-message=always
+
+# MAIL (GMAIL SMTP) - Cần tạo App Password nếu dùng Gmail
+spring.mail.host=smtp.gmail.com
+spring.mail.port=587
+spring.mail.username=your-email@gmail.com
+spring.mail.password=your-app-password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+
+# CLOUDINARY CONFIG 
+cloudinary.cloud-name=
+cloudinary.api-key=
+cloudinary.api-secret=
+
+# APP CUSTOM
+app.jwtSecret=
+app.jwtExpirationMs=
+
+# VNPay Config
+vnpay.tmn-code=
+vnpay.hash-secret=
+vnpay.url=
+vnpay.return-url=http://localhost:8091/payment/vnpay-return

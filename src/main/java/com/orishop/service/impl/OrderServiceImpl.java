@@ -29,7 +29,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public Order placeOrder(User user, List<CartItem> cartItems, String shippingName, String shippingPhone,
-            String shippingAddress, String note, String couponCode, BigDecimal discountAmount) {
+            String shippingAddress, String note, String couponCode, BigDecimal discountAmount, String paymentMethod) {
         // 1. Tính tổng tiền
         BigDecimal totalAmount = cartItems.stream()
                 .map(CartItem::getTotalPrice)
@@ -46,13 +46,12 @@ public class OrderServiceImpl implements OrderService {
         order.setShippingName(shippingName);
         order.setShippingPhone(shippingPhone);
         order.setShippingAddress(shippingAddress);
-        order.setShippingAddress(shippingAddress);
         order.setNote(note);
         order.setTotalAmount(totalAmount);
         order.setCouponCode(couponCode);
         order.setDiscountAmount(discountAmount);
         order.setStatus(OrderStatus.PENDING);
-        order.setPaymentMethod("COD"); // Mặc định COD
+        order.setPaymentMethod(paymentMethod != null ? paymentMethod : "COD");
         // order.setCreatedAt(LocalDateTime.now()); // Đã có @PrePersist xử lý
 
         Order savedOrder = orderRepository.save(order);
@@ -82,5 +81,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void deleteOrder(Long id) {
         orderRepository.deleteById(id);
+    }
+
+    @Override
+    public void updateOrderStatus(Long orderId, com.orishop.model.OrderStatus status) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null) {
+            order.setStatus(status);
+            orderRepository.save(order);
+        }
+    }
+
+    @Override
+    public void updatePaymentStatus(Long orderId, boolean paymentStatus) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null) {
+            order.setPaymentStatus(paymentStatus);
+            orderRepository.save(order);
+        }
     }
 }

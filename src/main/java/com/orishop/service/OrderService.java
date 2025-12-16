@@ -8,9 +8,13 @@ import java.util.List;
 
 public interface OrderService {
     Order placeOrder(User user, List<CartItem> cartItems, String shippingName, String shippingPhone,
-            String shippingAddress, String note, String couponCode, BigDecimal discountAmount);
+            String shippingAddress, String note, String couponCode, BigDecimal discountAmount, String paymentMethod);
 
     List<Order> getOrdersByUser(Long userId);
 
     void deleteOrder(Long id);
+
+    void updateOrderStatus(Long orderId, com.orishop.model.OrderStatus status);
+    
+    void updatePaymentStatus(Long orderId, boolean paymentStatus);
 }

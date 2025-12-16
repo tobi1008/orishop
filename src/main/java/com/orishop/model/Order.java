@@ -36,6 +36,8 @@ public class Order {
     private String shippingName; // Người nhận
 
     private String paymentMethod; // COD, VNPay...
+    
+    private boolean paymentStatus; // true = PAID, false = UNPAID
 
     private String note;
 

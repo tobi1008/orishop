@@ -15,6 +15,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.servlet.http.HttpServletRequest;
+import com.orishop.model.Order;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class WebController {
     private final ReviewService reviewService;
     private final UserRepository userRepository;
     private final com.orishop.repository.ContactRepository contactRepository;
+    private final com.orishop.service.VnPayService vnPayService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -220,18 +223,54 @@ public class WebController {
             @RequestParam String phone,
             @RequestParam String address,
             @RequestParam(required = false) String note,
-            Principal principal) {
+            @RequestParam(defaultValue = "COD") String paymentMethod,
+            Principal principal,
+            HttpServletRequest request) {
 
         User user = null;
         if (principal != null) {
             user = userRepository.findByEmail(principal.getName()).orElse(null);
         }
 
-        orderService.placeOrder(user, cartService.getCart(), fullName, phone, address, note,
-                cartService.getAppliedCoupon(), cartService.getDiscountAmount());
-
+        com.orishop.model.Order order = orderService.placeOrder(user, cartService.getCart(), fullName, phone, address, note,
+                cartService.getAppliedCoupon(), cartService.getDiscountAmount(), paymentMethod);
+        
         cartService.clearCart();
+        
+        if ("VNPAY".equals(paymentMethod)) {
+            String paymentUrl = vnPayService.createPaymentUrl(order, request);
+            return "redirect:" + paymentUrl;
+        }
+
         return "redirect:/checkout/success";
+    }
+
+    @GetMapping("/payment/vnpay-return")
+    public String vnpayReturn(HttpServletRequest request, Model model) {
+        int paymentStatus = vnPayService.orderReturn(request);
+
+        String orderInfo = request.getParameter("vnp_OrderInfo");
+        String paymentTime = request.getParameter("vnp_PayDate");
+        String transactionId = request.getParameter("vnp_TransactionNo");
+        String totalPrice = request.getParameter("vnp_Amount");
+
+        model.addAttribute("orderId", orderInfo);
+        model.addAttribute("totalPrice", totalPrice);
+        model.addAttribute("paymentTime", paymentTime);
+        model.addAttribute("transactionId", transactionId);
+
+        if (paymentStatus == 1) {
+            try {
+                Long orderId = Long.parseLong(transactionId);
+                String vnpTxnRef = request.getParameter("vnp_TxnRef");
+                Long refId = Long.parseLong(vnpTxnRef);
+                orderService.updatePaymentStatus(refId, true);
+            } catch (NumberFormatException e) {
+            }
+            return "web/order-success"; 
+        } else {
+            return "web/order-fail";
+        }
     }
 
     @GetMapping("/orders")
