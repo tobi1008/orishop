@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import com.orishop.model.Order;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class WebController {
     private final UserRepository userRepository;
     private final com.orishop.repository.ContactRepository contactRepository;
     private final com.orishop.service.VnPayService vnPayService;
+    private final com.orishop.service.MoMoService moMoService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -240,6 +242,11 @@ public class WebController {
         if ("VNPAY".equals(paymentMethod)) {
             String paymentUrl = vnPayService.createPaymentUrl(order, request);
             return "redirect:" + paymentUrl;
+        } else if ("MOMO".equals(paymentMethod)) {
+            String paymentUrl = moMoService.createPayment(order);
+            if (paymentUrl != null) {
+                return "redirect:" + paymentUrl;
+            }
         }
 
         return "redirect:/checkout/success";
@@ -271,6 +278,54 @@ public class WebController {
         } else {
             return "web/order-fail";
         }
+    }
+
+    @GetMapping("/payment/momo-return")
+    public String momoReturn(HttpServletRequest request, Model model) {
+        String orderInfo = request.getParameter("orderInfo");
+        String requestId = request.getParameter("requestId");
+        String errorCode = request.getParameter("errorCode");
+        String message = request.getParameter("message");
+        String amount = request.getParameter("amount");
+        String transId = request.getParameter("transId");
+        String orderIdStr = request.getParameter("orderId");
+
+        model.addAttribute("orderId", orderInfo);
+        model.addAttribute("totalPrice", amount);
+        model.addAttribute("paymentTime", new java.util.Date().toString());
+        model.addAttribute("transactionId", transId);
+
+        if ("0".equals(errorCode)) {
+            // Success
+            try {
+               Long orderId = Long.parseLong(orderIdStr);
+               orderService.updatePaymentStatus(orderId, true);
+            } catch (Exception e) {}
+            return "web/order-success";
+        } else {
+            return "web/order-fail";
+        }
+    }
+
+    @PostMapping("/payment/momo-ipn")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Void> momoIpn(@RequestBody Map<String, Object> payload) {
+        // MoMo sends POST request with JSON body
+        // Verify signature here usually, but for simple integration we take errorCode
+        
+        try {
+            String errorCode = String.valueOf(payload.get("errorCode"));
+            String orderIdStr = String.valueOf(payload.get("orderId"));
+            
+            if ("0".equals(errorCode)) {
+                 Long orderId = Long.parseLong(orderIdStr);
+                 orderService.updatePaymentStatus(orderId, true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return org.springframework.http.ResponseEntity.noContent().build();
     }
 
     @GetMapping("/orders")

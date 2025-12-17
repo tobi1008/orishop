@@ -41,3 +41,12 @@ vnpay.tmn-code=
 vnpay.hash-secret=
 vnpay.url=
 vnpay.return-url=http://localhost:8091/payment/vnpay-return
+
+# MoMo Config
+# Download this app to test the feature: https://developers.momo.vn/v3/download/
+momo.partner-code=
+momo.access-key=
+momo.secret-key=
+momo.endpoint=
+momo.return-url=http://localhost:8091/payment/momo-return
+momo.ipn-url=http://localhost:8091/payment/momo-ipn
