@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title th:text="${pageTitle} + ' - OriShop'">Trang thông tin - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${pageTitle}">Trang</li>
+            </ol>
+        </nav>
+
+        <h1 class="mb-4 fw-bold" th:text="${pageTitle}">Tiêu đề trang</h1>
+
+        <div class="bg-white p-4 rounded shadow-sm border">
+            <div th:utext="${pageContent}">
+                Nội dung đang cập nhật...
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -3,34 +3,30 @@
 		<div class="row g-4">
 			<!-- Column 1: Logo & Disclaimer -->
 			<div class="col-lg-5 col-md-6">
-				<a href="/"
-					class="d-flex align-items-center text-decoration-none mb-3">
-					<div
-						class="bg-pink rounded-circle p-2 d-flex align-items-center justify-content-center me-2"
-						style="width: 50px; height: 50px; background-color: #ec407a;">
-						<i class="fa-solid fa-spa fa-lg text-white"></i>
-					</div>
+				<a href="/" class="d-flex align-items-center text-decoration-none mb-3">
+					<th:block
+						th:if="${globalSettings.get('site_logo') != null and globalSettings.get('site_logo').startsWith('http')}">
+						<img th:src="${globalSettings.get('site_logo')}" alt="Logo" style="height: 50px;"
+							class="me-2 rounded">
+					</th:block>
+					<th:block
+						th:unless="${globalSettings.get('site_logo') != null and globalSettings.get('site_logo').startsWith('http')}">
+						<div class="bg-pink rounded-circle p-2 d-flex align-items-center justify-content-center me-2"
+							style="width: 50px; height: 50px;">
+							<i class="fa-solid fa-spa fa-lg text-white"></i>
+						</div>
+					</th:block>
 					<div>
-						<h4 class="fw-bold mb-0 text-dark"
-							style="color: #ec407a !important;">OriShop</h4>
-						<span class="small text-muted" style="letter-spacing: 2px;">BEAUTY
-							& COSMETICS</span>
+						<h4 class="fw-bold mb-0 text-dark" th:text="${globalSettings.get('site_name')}"
+							style="color: var(--primary-color) !important;">OriShop</h4>
+						<span class="small text-muted" style="letter-spacing: 2px;">BEAUTY & COSMETICS</span>
 					</div>
 				</a>
 
-				<div class="text-muted small lh-lg"
-					style="font-size: 0.9rem; text-align: justify;">
-					<p class="mb-2">
-						<strong>OriShop</strong> cung cấp thông tin giá, mô tả, hình ảnh
-						và thông tin chi tiết của sản phẩm Chăm sóc da mặt, Chăm sóc cơ
-						thể, Trang điểm, Chăm sóc tóc và da đầu, Nước hoa, Bộ sản phẩm làm
-						đẹp, Mỹ phẩm nam, Mỹ Phẩm Khác...
+				<div class="text-muted small lh-lg" style="font-size: 0.9rem; text-align: justify;">
+					<p class="mb-2" th:utext="${globalSettings.get('footer_desc')}">
+						Mô tả website...
 					</p>
-					<p class="mb-2">Với nhiều mặt hàng bộ dưỡng da, set dưỡng da,
-						set trắng da innisfree, bộ trang điểm, bộ chăm sóc da mặt, set
-						dưỡng da, vichy chính hãng, tẩy tế bào chết da mặt, sữa rửa mặt,
-						kem dưỡng ẩm... từ các sàn thương mại điện tử uy tín, nhằm giúp
-						khách hàng lựa chọn sản phẩm phù hợp với giá tốt nhất.</p>
 				</div>
 			</div>
 
@@ -39,13 +35,12 @@
 				<h6 class="fw-bold mb-3 text-dark">Danh Mục Sản Phẩm</h6>
 				<ul class="list-unstyled text-muted small lh-lg">
 					<li th:each="cat : ${globalCategories}"><a
-						th:href="@{/category/{slug}(slug=${cat.slug != null && cat.slug != '' ? cat.slug : cat.id})}"
-						class="text-decoration-none text-muted cat-link"
-						th:text="${cat.name}">Category Name</a></li>
+							th:href="@{/category/{slug}(slug=${cat.slug != null && cat.slug != '' ? cat.slug : cat.id})}"
+							class="text-decoration-none text-muted cat-link" th:text="${cat.name}">Category Name</a>
+					</li>
 					<!-- Static Fallback if cat is empty -->
-					<li
-						th:if="${globalCategories == null || globalCategories.isEmpty()}"><a
-						href="#" class="text-decoration-none text-muted cat-link">Chăm
+					<li th:if="${globalCategories == null || globalCategories.isEmpty()}"><a href="#"
+							class="text-decoration-none text-muted cat-link">Chăm
 							sóc da mặt</a></li>
 
 				</ul>
@@ -56,44 +51,66 @@
 				<div class="mb-4">
 					<h6 class="fw-bold mb-3 text-dark">Về OriShop</h6>
 					<ul class="list-unstyled text-muted small lh-lg">
-						<li><a href="/about"
-							class="text-decoration-none text-muted cat-link">Giới thiệu</a></li>
-						<li><a href="/contact"
-							class="text-decoration-none text-muted cat-link">Liên hệ</a></li>
-						<li><a href="#"
-							class="text-decoration-none text-muted cat-link">Chính sách
+						<li><a href="/about" class="text-decoration-none text-muted cat-link">Giới thiệu</a></li>
+						<li><a href="/contact" class="text-decoration-none text-muted cat-link">Liên hệ</a></li>
+						<li><a href="/pages/privacy-policy" class="text-decoration-none text-muted cat-link">Chính sách
 								bảo mật</a></li>
-						<li><a href="#"
-							class="text-decoration-none text-muted cat-link">Điều khoản
+						<li><a href="/pages/terms-of-use" class="text-decoration-none text-muted cat-link">Điều khoản
 								sử dụng</a></li>
+						<li><a href="/pages/return-policy" class="text-decoration-none text-muted cat-link">Chính sách
+								đổi trả</a></li>
 					</ul>
 				</div>
 
 				<div>
 					<h6 class="fw-bold mb-3 text-dark">Liên hệ</h6>
 					<ul class="list-unstyled text-muted small lh-base">
-						<li class="mb-2"><strong>Địa chỉ:</strong> <span
-							class="fw-bold text-dark">OriShop</span>, 1 Võ Văn Ngân,
-							Linh Chiểu, Thủ Đức, TP. Hồ Chí Minh</li>
-						<li><strong>Email:</strong> <a
-							href="mailto:info@TheFaceHolic.com"
-							class="text-decoration-none text-dark">contact@orishop.com</a>
-						</li>
+						<li class="mb-2"><strong>Địa chỉ:</strong> <span class="fw-bold text-dark"
+								th:text="${globalSettings.get('site_name')}">OriShop</span>, <span
+								th:text="${globalSettings.get('contact_address')}">Address</span></li>
+						<li><strong>Email:</strong> <a th:href="'mailto:' + ${globalSettings.get('contact_email')}"
+								class="text-decoration-none text-dark"
+								th:text="${globalSettings.get('contact_email')}">email@example.com</a></li>
+						<li><strong>Hotline:</strong> <span class="text-dark"
+								th:text="${globalSettings.get('contact_phone')}">0123456789</span></li>
 					</ul>
+
+					<div class="mt-4">
+						<h6 class="fw-bold mb-3 text-dark">Kết nối với chúng tôi</h6>
+						<div class="d-flex gap-3">
+							<a th:if="${globalSettings.get('social_facebook')}"
+								th:href="${globalSettings.get('social_facebook')}"
+								class="text-decoration-none text-muted cat-link fs-5" target="_blank"><i
+									class="fab fa-facebook"></i></a>
+							<a th:if="${globalSettings.get('social_instagram')}"
+								th:href="${globalSettings.get('social_instagram')}"
+								class="text-decoration-none text-muted cat-link fs-5" target="_blank"><i
+									class="fab fa-instagram"></i></a>
+							<a th:if="${globalSettings.get('social_youtube')}"
+								th:href="${globalSettings.get('social_youtube')}"
+								class="text-decoration-none text-muted cat-link fs-5" target="_blank"><i
+									class="fab fa-youtube"></i></a>
+							<a th:if="${globalSettings.get('social_tiktok')}"
+								th:href="${globalSettings.get('social_tiktok')}"
+								class="text-decoration-none text-muted cat-link fs-5" target="_blank"><i
+									class="fab fa-tiktok"></i></a>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Copyright Bar -->
-	<div class="py-3 text-center small"
-		style="background-color: #f8f9fa; color: #506677;">OriShop
-		© 2025 - Mỹ phẩm và sản phẩm làm đẹp chính hãng</div>
+	<div class="py-3 text-center small" style="background-color: #f8f9fa; color: #506677;">
+		<span th:text="${globalSettings.get('site_name')}">OriShop</span> © 2025 - Mỹ phẩm và sản phẩm làm đẹp chính
+		hãng
+	</div>
 
 	<style>
-.cat-link:hover {
-	color: #ec407a !important;
-	text-decoration: underline !important;
-}
-</style>
+		.cat-link:hover {
+			color: var(--primary-color) !important;
+			text-decoration: underline !important;
+		}
+	</style>
 </footer>

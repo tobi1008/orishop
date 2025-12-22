@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/admin}">
+
+<head>
+    <title>Cấu hình hệ thống - OriShop Admin</title>
+    <!-- Summernote CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div
+            class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+            <h1 class="h2">Cấu hình hệ thống</h1>
+        </div>
+
+        <div th:if="${message}" class="alert alert-success" role="alert">
+            <span th:text="${message}"></span>
+        </div>
+
+        <form th:action="@{/admin/settings}" method="post" enctype="multipart/form-data">
+            <nav>
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-general-tab" data-bs-toggle="tab"
+                        data-bs-target="#nav-general" type="button" role="tab" aria-controls="nav-general"
+                        aria-selected="true">Tổng quan</button>
+                    <button class="nav-link" id="nav-pages-tab" data-bs-toggle="tab" data-bs-target="#nav-pages"
+                        type="button" role="tab" aria-controls="nav-pages" aria-selected="false">Trang nội dung</button>
+                </div>
+            </nav>
+            <div class="tab-content pt-4" id="nav-tabContent">
+                <!-- Data is loaded from SettingsDataSeeder defaults if not present -->
+
+                <!-- GENERAL TAB -->
+                <div class="tab-pane fade show active" id="nav-general" role="tabpanel"
+                    aria-labelledby="nav-general-tab">
+
+                    <!-- Branding Section -->
+                    <h4 class="mb-3">Thương hiệu & Giao diện</h4>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="site_name" class="form-label">Tên Website</label>
+                            <input type="text" class="form-control" id="site_name" name="site_name"
+                                th:value="${settings.get('site_name')}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="primary_color" class="form-label">Màu chủ đạo (Primary Color)</label>
+                            <input type="color" class="form-control form-control-color" id="primary_color"
+                                name="primary_color" th:value="${settings.get('primary_color')}"
+                                title="Choose your color">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="site_logo_file" class="form-label">Logo Website</label>
+                        <input type="file" class="form-control" id="site_logo_file" name="site_logo_file"
+                            accept="image/*">
+                        <input type="hidden" name="site_logo" th:value="${settings.get('site_logo')}">
+
+                        <div class="mt-2" th:if="${settings.get('site_logo') != null}">
+                            <p class="small text-muted mb-1">Logo hiện tại:</p>
+                            <img th:src="${settings.get('site_logo')}" alt="Current Logo" style="max-height: 50px;"
+                                class="border rounded p-1">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="footer_desc" class="form-label">Mô tả Footer</label>
+                        <textarea class="form-control" id="footer_desc" name="footer_desc" rows="2"
+                            th:text="${settings.get('footer_desc')}"></textarea>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- SEO Section -->
+                    <h4 class="mb-3">Cấu hình SEO</h4>
+                    <div class="mb-3">
+                        <label for="seo_title" class="form-label">SEO Title (Tiêu đề trang chủ)</label>
+                        <input type="text" class="form-control" id="seo_title" name="seo_title"
+                            th:value="${settings.get('seo_title')}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="seo_keywords" class="form-label">Meta Keywords</label>
+                        <input type="text" class="form-control" id="seo_keywords" name="seo_keywords"
+                            th:value="${settings.get('seo_keywords')}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="seo_desc" class="form-label">Meta Description</label>
+                        <textarea class="form-control" id="seo_desc" name="seo_desc" rows="2"
+                            th:text="${settings.get('seo_desc')}"></textarea>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Contact Section -->
+                    <h4 class="mb-3">Thông tin liên hệ</h4>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="contact_phone" class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="contact_phone" name="contact_phone"
+                                th:value="${settings.get('contact_phone')}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contact_email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="contact_email" name="contact_email"
+                                th:value="${settings.get('contact_email')}">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contact_address" class="form-label">Địa chỉ</label>
+                        <input type="text" class="form-control" id="contact_address" name="contact_address"
+                            th:value="${settings.get('contact_address')}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="map_embed" class="form-label">Mã nhúng bản đồ (Iframe URL)</label>
+                        <textarea class="form-control" id="map_embed" name="map_embed" rows="2"
+                            th:text="${settings.get('map_embed')}"></textarea>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Social Section -->
+                    <h4 class="mb-3">Mạng xã hội</h4>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="social_facebook" class="form-label">Facebook URL</label>
+                            <input type="text" class="form-control" id="social_facebook" name="social_facebook"
+                                th:value="${settings.get('social_facebook')}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="social_instagram" class="form-label">Instagram URL</label>
+                            <input type="text" class="form-control" id="social_instagram" name="social_instagram"
+                                th:value="${settings.get('social_instagram')}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="social_youtube" class="form-label">Youtube URL</label>
+                            <input type="text" class="form-control" id="social_youtube" name="social_youtube"
+                                th:value="${settings.get('social_youtube')}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="social_tiktok" class="form-label">TikTok URL</label>
+                            <input type="text" class="form-control" id="social_tiktok" name="social_tiktok"
+                                th:value="${settings.get('social_tiktok')}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGES TAB -->
+                <div class="tab-pane fade" id="nav-pages" role="tabpanel" aria-labelledby="nav-pages-tab">
+
+                    <div class="mb-4">
+                        <label for="page_privacy_policy" class="form-label fw-bold">Chính sách bảo mật</label>
+                        <textarea id="page_privacy_policy" name="page_privacy_policy" class="summernote"
+                            th:text="${settings.get('page_privacy_policy')}"></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="page_terms_of_use" class="form-label fw-bold">Điều khoản sử dụng</label>
+                        <textarea id="page_terms_of_use" name="page_terms_of_use" class="summernote"
+                            th:text="${settings.get('page_terms_of_use')}"></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="page_return_policy" class="form-label fw-bold">Chính sách đổi trả</label>
+                        <textarea id="page_return_policy" name="page_return_policy" class="summernote"
+                            th:text="${settings.get('page_return_policy')}"></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4 mb-5">
+                <button class="btn btn-primary px-5" type="submit">
+                    <i class="fa fa-save me-2"></i> Lưu cấu hình
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <th:block layout:fragment="script">
+        <!-- Summernote JS -->
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+            integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+            crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $('.summernote').summernote({
+                    placeholder: 'Nhập nội dung...',
+                    tabsize: 2,
+                    height: 300,
+                    toolbar: [
+                        ['style', ['style']],
+                        ['font', ['bold', 'underline', 'clear']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['table', ['table']],
+                        ['insert', ['link', 'picture', 'video']],
+                        ['view', ['fullscreen', 'codeview', 'help']]
+                    ]
+                });
+            });
+        </script>
+    </th:block>
+</body>
+
+</html>

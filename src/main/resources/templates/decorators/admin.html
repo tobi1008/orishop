@@ -106,6 +106,12 @@
                                 <i class="fa fa-bolt"></i> Flash Sales
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/admin/settings}"
+                                th:classappend="${requestURI.startsWith('/admin/settings') ? 'active' : ''}">
+                                <i class="fa fa-cog"></i> Cấu hình
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </nav>

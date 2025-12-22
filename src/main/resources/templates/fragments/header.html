@@ -8,26 +8,31 @@
             <div class="container">
                 <div class="d-flex align-items-center justify-content-between">
                     <!-- Logo -->
+                    <!-- Logo -->
                     <a class="navbar-brand text-decoration-none d-flex align-items-center" href="/">
-                        <div class="bg-white rounded-circle p-1 d-flex align-items-center justify-content-center me-2"
-                            style="width: 40px; height: 40px;">
-                            <i class="fa-solid fa-spa text-pink" style="color: #ec407a;"></i>
-                        </div>
-                        <span class="h4 fw-bold mb-0 text-dark" style="color: #ec407a !important;">OriShop</span>
+                        <th:block
+                            th:if="${globalSettings.get('site_logo') != null and globalSettings.get('site_logo').startsWith('http')}">
+                            <img th:src="${globalSettings.get('site_logo')}" alt="Logo" style="height: 40px;"
+                                class="me-2 rounded">
+                        </th:block>
+                        <th:block
+                            th:unless="${globalSettings.get('site_logo') != null and globalSettings.get('site_logo').startsWith('http')}">
+                            <div class="bg-white rounded-circle p-1 d-flex align-items-center justify-content-center me-2"
+                                style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-spa text-pink"></i>
+                            </div>
+                        </th:block>
+                        <span class="h4 fw-bold mb-0 text-dark"
+                            th:text="${globalSettings.get('site_name')}">OriShop</span>
                     </a>
 
                     <!-- Main Navigation -->
                     <ul class="nav d-none d-lg-flex">
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;" href="/">TRANG
-                                CHỦ</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;"
-                                href="/product">DANH MỤC</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;"
-                                href="/about">THƯƠNG HIỆU</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;"
-                                href="/contact">LIÊN HỆ</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" style="color: #ec407a;" href="/orders">TRA
-                                CỨU ĐƠN HÀNG</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/">TRANG CHỦ</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/product">DANH MỤC</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/about">THƯƠNG HIỆU</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/contact">LIÊN HỆ</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/orders">TRA CỨU ĐƠN HÀNG</a></li>
                     </ul>
 
                     <!-- Icons: User & Cart -->
@@ -35,13 +40,13 @@
                         <!-- User Info (Visible when logged in) -->
                         <div sec:authorize="isAuthenticated()" class="d-none d-md-block text-end me-1">
                             <span class="small d-block text-muted">Xin chào,</span>
-                            <span sec:authentication="name" class="fw-bold" style="color: #ec407a;">User</span>
+                            <span sec:authentication="name" class="fw-bold text-pink">User</span>
                         </div>
 
                         <!-- User Icon -->
                         <div class="dropdown">
-                            <a class="text-decoration-none fs-5" href="#" id="userDropdown" role="button"
-                                data-bs-toggle="dropdown" aria-expanded="false" style="color: #ec407a;">
+                            <a class="text-decoration-none fs-5 text-pink" href="#" id="userDropdown" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fa-regular fa-user"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-3 rounded-3"
@@ -75,7 +80,7 @@
                         </div>
 
                         <!-- Cart Icon -->
-                        <a href="/cart" class="text-decoration-none position-relative fs-5" style="color: #ec407a;">
+                        <a href="/cart" class="text-decoration-none position-relative fs-5 text-pink">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span
                                 class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-dark text-white border border-light"
@@ -86,8 +91,8 @@
                         </a>
 
                         <!-- Mobile Menu Button -->
-                        <button class="navbar-toggler d-lg-none border-0 ms-2" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#mobileNav" style="color: #ec407a;">
+                        <button class="navbar-toggler d-lg-none border-0 ms-2 text-pink" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#mobileNav">
                             <i class="fa-solid fa-bars fs-4"></i>
                         </button>
                     </div>
@@ -106,7 +111,7 @@
                                     class="form-control rounded-start-pill ps-4 border-end-0 border-secondary-subtle"
                                     name="keyword" placeholder="Bạn muốn mua gì?" aria-label="Search">
                                 <button class="btn btn-danger text-white rounded-end-pill px-4" type="submit"
-                                    style="background-color: #ec407a; border-color: #ec407a;">
+                                    style="background-color: var(--primary-color) !important; border-color: var(--primary-color) !important;">
                                     Tìm kiếm
                                 </button>
                             </div>
@@ -130,10 +135,6 @@
         </div>
 
         <style>
-            .text-pink {
-                color: #ec407a !important;
-            }
-
             .bg-pink {
                 background-color: #fce4ec !important;
             }
