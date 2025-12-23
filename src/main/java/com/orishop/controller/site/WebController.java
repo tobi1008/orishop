@@ -32,6 +32,7 @@ public class WebController {
     private final com.orishop.repository.ContactRepository contactRepository;
     private final com.orishop.service.VnPayService vnPayService;
     private final com.orishop.service.MoMoService moMoService;
+    private final com.orishop.service.impl.RecentlyViewedService recentlyViewedService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -48,7 +49,7 @@ public class WebController {
     }
 
     @GetMapping("/product/{slug}")
-    public String productDetail(@PathVariable String slug, Model model) {
+    public String productDetail(@PathVariable String slug, Model model, Principal principal) {
         Product product = productService.getProductBySlug(slug).orElse(null);
 
         if (product == null) {
@@ -62,6 +63,13 @@ public class WebController {
 
         if (product == null) {
             throw new RuntimeException("Product not found");
+        }
+
+        if (principal != null) {
+            User user = userRepository.findByEmail(principal.getName()).orElse(null);
+            if (user != null) {
+                recentlyViewedService.recordView(user, product);
+            }
         }
 
         model.addAttribute("product", product);
@@ -361,6 +369,23 @@ public class WebController {
         }
         model.addAttribute("user", user);
         return "web/profile";
+    }
+
+    @GetMapping("/recently-viewed")
+    public String recentlyViewed(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+
+        java.util.List<Product> recentlyViewed = recentlyViewedService.getRecentlyViewedProducts(user, 20); // Limit 20
+        populateFlashSaleInfo(recentlyViewed);
+        model.addAttribute("recentlyViewed", recentlyViewed);
+
+        return "web/recently-viewed";
     }
 
     @GetMapping("/contact")

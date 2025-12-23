@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Sản phẩm đã xem - OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5">
+        <h2 class="mb-4">Sản phẩm đã xem</h2>
+
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0">
+                                <i class="fa fa-user-circle fa-2x text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-0 fw-bold" th:text="${#authentication.name}">Username</h6>
+                            </div>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="/profile" class="list-group-item list-group-item-action">Hồ sơ cá nhân</a>
+                            <a href="/orders" class="list-group-item list-group-item-action">Đơn mua</a>
+                            <a href="/recently-viewed" class="list-group-item list-group-item-action active">Sản phẩm đã
+                                xem</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Danh sách sản phẩm đã xem</h4>
+
+                        <div th:if="${recentlyViewed == null || recentlyViewed.isEmpty()}" class="text-center py-5">
+                            <i class="fa fa-history fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Bạn chưa xem sản phẩm nào gần đây.</p>
+                            <a href="/" class="btn btn-primary">Khám phá ngay</a>
+                        </div>
+
+                        <div class="row row-cols-2 row-cols-md-3 g-3"
+                            th:if="${recentlyViewed != null && !recentlyViewed.isEmpty()}">
+                            <div class="col" th:each="product : ${recentlyViewed}">
+                                <div class="card h-100 card-product shadow-sm border-0 position-relative group-hover">
+                                    <span th:if="${product.flashSalePrice != null}"
+                                        class="position-absolute top-0 start-0 badge bg-danger m-2">-<span
+                                            th:text="${#numbers.formatInteger((1 - product.flashSalePrice/product.price) * 100, 0)}"></span>%</span>
+
+                                    <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                                        class="text-decoration-none">
+                                        <img th:src="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
+                                            class="card-img-top" alt="Product Image"
+                                            style="height: 180px; object-fit: cover;">
+                                    </a>
+
+                                    <div class="card-body p-2 d-flex flex-column">
+                                        <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                                            class="text-decoration-none text-dark">
+                                            <h6 class="card-title text-truncate mb-1" th:text="${product.name}"
+                                                style="font-size: 0.9rem;">Product Name</h6>
+                                        </a>
+
+                                        <div class="mt-auto">
+                                            <div th:if="${product.flashSalePrice != null}">
+                                                <p class="text-danger fw-bold mb-0" style="font-size: 1rem;"
+                                                    th:text="${#numbers.formatDecimal(product.flashSalePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                    400.000 đ</p>
+                                                <small class="text-muted text-decoration-line-through"
+                                                    style="font-size: 0.8rem;"
+                                                    th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">500.000
+                                                    đ</small>
+                                            </div>
+                                            <p th:unless="${product.flashSalePrice != null}"
+                                                class="text-danger fw-bold mb-0" style="font-size: 1rem;"
+                                                th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                                500.000 đ</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
