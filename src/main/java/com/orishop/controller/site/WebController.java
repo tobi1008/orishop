@@ -38,6 +38,11 @@ public class WebController {
         java.util.List<Product> products = productService.getAllProducts();
         populateFlashSaleInfo(products);
         model.addAttribute("products", products);
+
+        java.util.List<Product> bestSellers = productService.getBestSellingProducts(10);
+        populateFlashSaleInfo(bestSellers);
+        model.addAttribute("bestSellers", bestSellers);
+
         model.addAttribute("activeFlashSales", flashSaleService.findActiveFlashSales(new java.util.Date()));
         return "web/index"; // templates/web/index.html
     }
@@ -234,11 +239,12 @@ public class WebController {
             user = userRepository.findByEmail(principal.getName()).orElse(null);
         }
 
-        com.orishop.model.Order order = orderService.placeOrder(user, cartService.getCart(), fullName, phone, address, note,
+        com.orishop.model.Order order = orderService.placeOrder(user, cartService.getCart(), fullName, phone, address,
+                note,
                 cartService.getAppliedCoupon(), cartService.getDiscountAmount(), paymentMethod);
-        
+
         cartService.clearCart();
-        
+
         if ("VNPAY".equals(paymentMethod)) {
             String paymentUrl = vnPayService.createPaymentUrl(order, request);
             return "redirect:" + paymentUrl;
@@ -274,7 +280,7 @@ public class WebController {
                 orderService.updatePaymentStatus(refId, true);
             } catch (NumberFormatException e) {
             }
-            return "web/order-success"; 
+            return "web/order-success";
         } else {
             return "web/order-fail";
         }
@@ -298,9 +304,10 @@ public class WebController {
         if ("0".equals(errorCode)) {
             // Success
             try {
-               Long orderId = Long.parseLong(orderIdStr);
-               orderService.updatePaymentStatus(orderId, true);
-            } catch (Exception e) {}
+                Long orderId = Long.parseLong(orderIdStr);
+                orderService.updatePaymentStatus(orderId, true);
+            } catch (Exception e) {
+            }
             return "web/order-success";
         } else {
             return "web/order-fail";
@@ -312,19 +319,19 @@ public class WebController {
     public org.springframework.http.ResponseEntity<Void> momoIpn(@RequestBody Map<String, Object> payload) {
         // MoMo sends POST request with JSON body
         // Verify signature here usually, but for simple integration we take errorCode
-        
+
         try {
             String errorCode = String.valueOf(payload.get("errorCode"));
             String orderIdStr = String.valueOf(payload.get("orderId"));
-            
+
             if ("0".equals(errorCode)) {
-                 Long orderId = Long.parseLong(orderIdStr);
-                 orderService.updatePaymentStatus(orderId, true);
+                Long orderId = Long.parseLong(orderIdStr);
+                orderService.updatePaymentStatus(orderId, true);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         return org.springframework.http.ResponseEntity.noContent().build();
     }
 

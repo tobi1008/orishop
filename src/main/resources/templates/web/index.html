@@ -183,6 +183,69 @@
             </div>
         </div>
 
+        <!-- Best Selling Section -->
+        <div class="container mb-5" th:if="${bestSellers != null && !bestSellers.isEmpty()}">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h3 class="text-uppercase fw-bold text-dark border-start border-4 border-warning ps-3 mb-0">Sản phẩm bán
+                    chạy
+                </h3>
+            </div>
+
+            <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+                <!-- Loop products -->
+                <div class="col" th:each="product : ${bestSellers}">
+                    <div class="card h-100 card-product shadow-sm border-0 position-relative group-hover">
+
+                        <!-- Badges -->
+                        <span th:if="${product.flashSalePrice != null}"
+                            class="position-absolute top-0 start-0 badge bg-danger m-2">-<span
+                                th:text="${#numbers.formatInteger((1 - product.flashSalePrice/product.price) * 100, 0)}"></span>%</span>
+
+                        <span class="position-absolute top-0 end-0 badge bg-warning text-dark m-2"><i
+                                class="fa-solid fa-fire"></i> Hot</span>
+
+                        <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                            class="text-decoration-none">
+                            <img th:src="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
+                                class="card-img-top" alt="Product Image" style="height: 180px; object-fit: cover;">
+                        </a>
+
+                        <div class="card-body p-2 d-flex flex-column">
+                            <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
+                                class="text-decoration-none text-dark">
+                                <h6 class="card-title text-truncate mb-1" th:text="${product.name}"
+                                    style="font-size: 0.9rem;">Tên sản phẩm</h6>
+                            </a>
+
+                            <div class="mt-auto">
+                                <div th:if="${product.flashSalePrice != null}">
+                                    <p class="text-danger fw-bold mb-0" style="font-size: 1rem;"
+                                        th:text="${#numbers.formatDecimal(product.flashSalePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        400.000 đ
+                                    </p>
+                                    <small class="text-muted text-decoration-line-through" style="font-size: 0.8rem;"
+                                        th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                        500.000 đ
+                                    </small>
+                                </div>
+
+                                <p th:unless="${product.flashSalePrice != null}" class="text-danger fw-bold mb-0"
+                                    style="font-size: 1rem;"
+                                    th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    500.000 đ
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-top-0 p-2">
+                            <a th:href="@{/cart/add/{id}(id=${product.id})}"
+                                class="btn btn-outline-warning text-dark w-100 btn-sm rounded-1">Chi tiết</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Product List Section -->
         <div class="container">
             <div class="d-flex align-items-center justify-content-between mb-4">

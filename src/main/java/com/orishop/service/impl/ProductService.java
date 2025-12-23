@@ -39,6 +39,11 @@ public class ProductService {
         return productRepository.searchByName(keyword);
     }
 
+    public List<Product> getBestSellingProducts(int limit) {
+        return productRepository.findBestSellingProducts(com.orishop.model.OrderStatus.COMPLETED,
+                org.springframework.data.domain.PageRequest.of(0, limit));
+    }
+
     public Product saveProduct(Product product) {
         return productRepository.save(product);
     }
