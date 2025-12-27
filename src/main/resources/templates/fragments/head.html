@@ -1,26 +1,26 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head th:fragment="head-css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${globalSettings.get('seo_title') != null ? globalSettings.get('seo_title') : 'OriShop'}">OriShop</title>
+    <title th:text="${globalSettings.get('seo_title') != null ? globalSettings.get('seo_title') : 'OriShop'}">OriShop
+    </title>
     <meta name="description" th:content="${globalSettings.get('seo_desc')}" />
     <meta name="keywords" th:content="${globalSettings.get('seo_keywords')}" />
     <link rel="stylesheet" href="/webjars/bootstrap/5.3.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Dynamic Color Settings (Optional Override) -->
     <style th:inline="css">
         :root {
-            --primary-color: [(${globalSettings.get('primary_color') != null ? globalSettings.get('primary_color') : '#d63384'})];
+            /* If user sets a primary color in DB, we can use it, otherwise fallback to style.css defaults */
+            /* --color-primary: [(${globalSettings.get('primary_color')})]; */
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
-        .navbar-brand { font-weight: bold; color: var(--primary-color) !important; }
-        .card-product:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); transition: all 0.3s; }
-        .footer { background-color: #212529; color: white; padding: 40px 0; }
-        .btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); }
-        .btn-primary:hover { opacity: 0.9; filter: brightness(0.9); background-color: var(--primary-color); border-color: var(--primary-color); }
-        .text-pink, .nav-link, .fw-bold.text-dark { color: var(--primary-color) !important; }
-        .bg-pink { background-color: #fce4ec !important; }
     </style>
 </head>
+
 <body></body>
+
 </html>

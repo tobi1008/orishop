@@ -33,12 +33,43 @@
                             alt="Default Image" style="height: 250px; object-fit: cover;">
                     </a>
                     <div class="card-body">
-                        <h5 class="card-title">
+                        <h5 class="card-title mb-1">
                             <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"
                                 class="text-dark text-decoration-none" th:text="${product.name}">Product Name</a>
                         </h5>
-                        <p class="card-text fw-bold text-primary"
-                            th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Price</p>
+
+                        <div class="mb-2 small">
+                            <span class="text-warning" th:if="${product.reviewCount > 0}">
+                                <i class="fa fa-star"></i> <span th:text="${product.averageRating}"></span>
+                                <span class="text-muted"> (<span th:text="${product.reviewCount}"></span>)</span>
+                            </span>
+                            <span class="text-muted" th:unless="${product.reviewCount > 0}">
+                                <i class="fa fa-star-o text-warning"></i> Chưa có đánh giá
+                            </span>
+                        </div>
+
+                        <div th:if="${product.flashSalePrice != null}">
+                            <p class="card-text fw-bold text-danger mb-0"
+                                th:text="${#numbers.formatDecimal(product.flashSalePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                Sale</p>
+                            <small class="text-muted text-decoration-line-through"
+                                th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Original</small>
+                        </div>
+
+                        <div th:unless="${product.flashSalePrice != null}">
+                            <div
+                                th:if="${product.discountPrice != null && product.discountPrice > 0 && product.discountPrice < product.price}">
+                                <p class="card-text fw-bold text-danger mb-0"
+                                    th:text="${#numbers.formatDecimal(product.discountPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    Sale</p>
+                                <small class="text-muted text-decoration-line-through"
+                                    th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Original</small>
+                            </div>
+                            <p th:unless="${product.discountPrice != null && product.discountPrice > 0 && product.discountPrice < product.price}"
+                                class="card-text fw-bold text-primary"
+                                th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">Price
+                            </p>
+                        </div>
                     </div>
                     <div class="card-footer bg-transparent border-top-0 d-flex gap-2">
                         <a th:href="@{/product/{slug}(slug=${product.slug != null && product.slug != '' ? product.slug : product.id})}"

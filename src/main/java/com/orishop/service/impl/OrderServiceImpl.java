@@ -74,8 +74,14 @@ public class OrderServiceImpl implements OrderService {
         return savedOrder;
     }
 
-    public List<Order> getOrdersByUser(Long userId) {
-        return orderRepository.findByUserId(userId);
+    @Override
+    public List<Order> getOrdersByUser(User user) {
+        return orderRepository.findByUser(user);
+    }
+
+    @Override
+    public Order getOrderById(Long id) {
+        return orderRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -98,6 +104,29 @@ public class OrderServiceImpl implements OrderService {
         if (order != null) {
             order.setPaymentStatus(paymentStatus);
             orderRepository.save(order);
+        }
+    }
+
+    @Override
+    public void completeOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null && order.getStatus() == OrderStatus.SHIPPING) {
+            order.setStatus(OrderStatus.COMPLETED);
+            orderRepository.save(order);
+        } else {
+            throw new RuntimeException("Đơn hàng chưa được giao hoặc trạng thái không hợp lệ!");
+        }
+    }
+
+    @Override
+    public void requestReturn(Long orderId, String reason) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order != null && order.getStatus() == OrderStatus.COMPLETED) {
+            order.setStatus(OrderStatus.RETURN_REQUESTED);
+            order.setReturnReason(reason);
+            orderRepository.save(order);
+        } else {
+            throw new RuntimeException("Chỉ có thể yêu cầu hoàn trả khi đơn hàng đã hoàn thành!");
         }
     }
 }

@@ -111,7 +111,7 @@ public class AdminController {
                 existingProduct.setStockQuantity(product.getStockQuantity());
                 existingProduct.setCategory(product.getCategory());
                 existingProduct.setDescription(product.getDescription());
-                existingProduct.setDescription(product.getDescription());
+                existingProduct.setDiscountPrice(product.getDiscountPrice());
                 existingProduct.setSlug(product.getSlug()); // Should be non-empty now
                 // KHÔNG set lại images thành null, giữ nguyên images cũ
 
@@ -220,8 +220,13 @@ public class AdminController {
 
     // --- Orders ---
     @GetMapping("/orders")
-    public String orderList(Model model) {
-        model.addAttribute("orders", orderRepository.findAll());
+    public String orderList(@RequestParam(required = false) OrderStatus status, Model model) {
+        if (status != null) {
+            model.addAttribute("orders", orderRepository.findByStatus(status));
+            model.addAttribute("currentStatus", status);
+        } else {
+            model.addAttribute("orders", orderRepository.findAll());
+        }
         return "admin/order-list";
     }
 

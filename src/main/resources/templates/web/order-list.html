@@ -25,7 +25,8 @@
                         <div class="list-group list-group-flush">
                             <a href="/profile" class="list-group-item list-group-item-action">Hồ sơ cá nhân</a>
                             <a href="/orders" class="list-group-item list-group-item-action active">Đơn mua</a>
-                            <a href="/recently-viewed" class="list-group-item list-group-item-action">Sản phẩm đã xem</a>
+                            <a href="/recently-viewed" class="list-group-item list-group-item-action">Sản phẩm đã
+                                xem</a>
                         </div>
                     </div>
                 </div>
@@ -48,7 +49,7 @@
                                         <th>Ngày đặt</th>
                                         <th>Trạng thái</th>
                                         <th>Tổng tiền</th>
-                                        <th></th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -57,18 +58,80 @@
                                         <td th:text="${#dates.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025
                                         </td>
                                         <td>
-                                            <span th:class="'badge ' +
+                                            <span
+                                                th:class="'badge ' +
                                                 (${order.status.name() == 'PENDING'} ? 'bg-warning' :
+                                                (${order.status.name() == 'CONFIRMED'} ? 'bg-primary' :
                                                 (${order.status.name() == 'SHIPPING'} ? 'bg-info' :
-                                                (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 'bg-danger')))"
-                                                th:text="${order.status}">PENDING</span>
+                                                (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 
+                                                (${order.status.name() == 'COMPLETED'} ? 'bg-success' : 
+                                                (${order.status.name() == 'RETURN_REQUESTED'} ? 'bg-warning text-dark' :
+                                                (${order.status.name() == 'RETURNED'} ? 'bg-secondary' : 'bg-danger')))))))"
+                                                th:text="${order.status.name() == 'PENDING' ? 'Chờ xử lý' : 
+                                                          (order.status.name() == 'CONFIRMED' ? 'Đã xác nhận' :
+                                                          (order.status.name() == 'SHIPPING' ? 'Đang giao' :
+                                                          (order.status.name() == 'DELIVERED' ? 'Đã giao' :
+                                                          (order.status.name() == 'COMPLETED' ? 'Hoàn thành' : 
+                                                          (order.status.name() == 'RETURN_REQUESTED' ? 'Yêu cầu hoàn trả' :
+                                                          (order.status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy'))))))}">PENDING</span>
                                         </td>
                                         <td class="fw-bold"
-                                            th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                            th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'">
                                             100.000 đ</td>
                                         <td>
-                                            <a href="#" class="btn btn-sm btn-outline-primary"
-                                                onclick="alert('Tính năng xem chi tiết đang phát triển!')">Chi tiết</a>
+                                            <!-- Button for Confirm Receipt -->
+                                            <form th:if="${order.status.name() == 'SHIPPING'}"
+                                                th:action="@{/orders/complete}" method="post" class="d-inline">
+                                                <input type="hidden" name="orderId" th:value="${order.id}">
+                                                <button type="submit" class="btn btn-sm btn-success"
+                                                    onclick="return confirm('Bạn đã nhận được hàng và hài lòng với sản phẩm?')">
+                                                    Đã nhận hàng
+                                                </button>
+                                            </form>
+
+                                            <a th:href="@{/user/order/{id}(id=${order.id})}"
+                                                class="btn btn-sm btn-outline-primary me-2">Chi
+                                                tiết</a>
+
+                                            <!-- Button for Return -->
+                                            <button th:if="${order.status.name() == 'COMPLETED'}"
+                                                class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                                th:data-bs-target="'#returnModal' + ${order.id}">
+                                                Hoàn hàng
+                                            </button>
+
+                                            <!-- Return Modal -->
+                                            <div class="modal fade" th:id="'returnModal' + ${order.id}" tabindex="-1"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">Yêu cầu hoàn trả đơn hàng #<span
+                                                                    th:text="${order.id}"></span></h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form th:action="@{/orders/return}" method="post">
+                                                            <div class="modal-body">
+                                                                <input type="hidden" name="orderId"
+                                                                    th:value="${order.id}">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Lý do hoàn trả:</label>
+                                                                    <textarea name="reason" class="form-control"
+                                                                        rows="3" required
+                                                                        placeholder="Vui lòng nhập lý do..."></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Đóng</button>
+                                                                <button type="submit" class="btn btn-danger">Gửi yêu
+                                                                    cầu</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>

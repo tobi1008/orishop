@@ -26,6 +26,7 @@
                         <th>Image</th>
                         <th>Name</th>
                         <th>Price</th>
+                        <th>Discount</th>
                         <th>Stock</th>
                         <th>Actions</th>
                     </tr>
@@ -37,8 +38,15 @@
                             <img th:src="${product.images != null && !product.images.isEmpty() ? product.images[0].imageUrl : 'https://via.placeholder.com/50'}"
                                 alt="" style="width: 50px; height: 50px; object-fit: cover;">
                         </td>
-                        <td th:text="${product.name}">Product Name</td>
+                        <th th:text="${product.name}">Product Name</th>
                         <td th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">100.000
+                        </td>
+                        <td>
+                            <span th:if="${product.discountPrice != null && product.discountPrice > 0}"
+                                th:text="${#numbers.formatDecimal(product.discountPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                class="text-danger fw-bold">90.000 đ</span>
+                            <span th:unless="${product.discountPrice != null && product.discountPrice > 0}"
+                                class="text-muted">-</span>
                         </td>
                         <td th:text="${product.stockQuantity}">100</td>
                         <td>

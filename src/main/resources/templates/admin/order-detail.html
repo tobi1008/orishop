@@ -32,12 +32,29 @@
                             class="d-inline-flex align-items-center">
                             <input type="hidden" name="id" th:value="${order.id}">
                             <select name="status" class="form-select form-select-sm me-2" style="width: auto;">
-                                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"
+                                <option th:each="status : ${statuses}" th:value="${status}" th:text="${status.name() == 'PENDING' ? 'Chờ xử lý' : 
+                                                  (status.name() == 'CONFIRMED' ? 'Đã xác nhận' :
+                                                  (status.name() == 'SHIPPING' ? 'Đang giao' :
+                                                  (status.name() == 'DELIVERED' ? 'Đã giao' :
+                                                  (status.name() == 'COMPLETED' ? 'Hoàn thành' : 
+                                                  (status.name() == 'RETURN_REQUESTED' ? 'Yêu cầu hoàn trả' :
+                                                  (status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy'))))))}"
                                     th:selected="${status == order.status}"></option>
                             </select>
                             <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
                         </form>
                         </p>
+
+                        <!-- Accept Return Button -->
+                        <form th:if="${order.status.name() == 'RETURN_REQUESTED'}"
+                            th:action="@{/admin/orders/update-status}" method="post" class="mt-2">
+                            <input type="hidden" name="id" th:value="${order.id}">
+                            <input type="hidden" name="status" value="RETURNED">
+                            <button type="submit" class="btn btn-success"
+                                onclick="return confirm('Xác nhận chấp nhận hoàn trả đơn hàng này?')">
+                                <i class="fa fa-check"></i> Chấp nhận hoàn trả
+                            </button>
+                        </form>
                         <p><strong>Phương thức thanh toán:</strong> <span th:text="${order.paymentMethod}">COD</span>
                         </p>
                         <p><strong>Tổng tiền:</strong> <span class="text-danger fw-bold"
@@ -56,6 +73,10 @@
                         <p><strong>Số điện thoại:</strong> <span th:text="${order.shippingPhone}"></span></p>
                         <p><strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress}"></span></p>
                         <p><strong>Ghi chú:</strong> <span th:text="${order.note}"></span></p>
+
+                        <div th:if="${order.returnReason != null}" class="alert alert-warning mt-3">
+                            <strong>Lý do hoàn trả:</strong> <span th:text="${order.returnReason}"></span>
+                        </div>
                     </div>
                 </div>
             </div>

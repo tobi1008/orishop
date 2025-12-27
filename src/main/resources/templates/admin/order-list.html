@@ -9,6 +9,49 @@
 <body>
     <div layout:fragment="content">
         <h2 class="mb-4">Quản lý Đơn hàng</h2>
+
+        <!-- Order Status Tabs -->
+        <ul class="nav nav-pills mb-4">
+            <li class="nav-item">
+                <a class="nav-link" th:classappend="${currentStatus == null} ? 'active'" href="/admin/orders">Tất cả</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'PENDING'} ? 'active'"
+                    href="/admin/orders?status=PENDING">Chờ xử lý</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'CONFIRMED'} ? 'active'"
+                    href="/admin/orders?status=CONFIRMED">Đã xác nhận</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'SHIPPING'} ? 'active'"
+                    href="/admin/orders?status=SHIPPING">Đang giao</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'COMPLETED'} ? 'active'"
+                    href="/admin/orders?status=COMPLETED">Hoàn thành</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'RETURN_REQUESTED'} ? 'active'"
+                    href="/admin/orders?status=RETURN_REQUESTED">Yêu cầu hoàn trả</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'RETURNED'} ? 'active'"
+                    href="/admin/orders?status=RETURNED">Đã hoàn trả</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'CANCELLED'} ? 'active'"
+                    href="/admin/orders?status=CANCELLED">Đã hủy</a>
+            </li>
+        </ul>
+
         <div class="table-responsive">
             <table class="table table-bordered table-hover">
                 <thead>
@@ -31,10 +74,34 @@
                         <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">Total
                         </td>
                         <td>
-                            <span class="badge bg-warning text-dark" th:text="${order.status}">PENDING</span>
+                            <span th:class="'badge ' +
+                                (${order.status.name() == 'PENDING'} ? 'bg-warning' :
+                                (${order.status.name() == 'CONFIRMED'} ? 'bg-primary' :
+                                (${order.status.name() == 'SHIPPING'} ? 'bg-info' :
+                                (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 
+                                (${order.status.name() == 'COMPLETED'} ? 'bg-success' : 
+                                (${order.status.name() == 'RETURN_REQUESTED'} ? 'bg-warning text-dark' :
+                                (${order.status.name() == 'RETURNED'} ? 'bg-secondary' : 'bg-danger')))))))"
+                                th:text="${order.status.name() == 'PENDING' ? 'Chờ xử lý' : 
+                                          (order.status.name() == 'CONFIRMED' ? 'Đã xác nhận' :
+                                          (order.status.name() == 'SHIPPING' ? 'Đang giao' :
+                                          (order.status.name() == 'DELIVERED' ? 'Đã giao' :
+                                          (order.status.name() == 'COMPLETED' ? 'Hoàn thành' : 
+                                          (order.status.name() == 'RETURN_REQUESTED' ? 'Yêu cầu hoàn trả' :
+                                          (order.status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy'))))))}">PENDING</span>
                         </td>
                         <td>
                             <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">Chi tiết</a>
+                            <form th:if="${order.status.name() == 'RETURN_REQUESTED'}"
+                                th:action="@{/admin/orders/update-status}" method="post" class="d-inline">
+                                <input type="hidden" name="id" th:value="${order.id}">
+                                <!-- Changed from orderId to id to match controller -->
+                                <input type="hidden" name="status" value="RETURNED">
+                                <button type="submit" class="btn btn-sm btn-success"
+                                    onclick="return confirm('Xác nhận chấp nhận hoàn trả đơn hàng này?')">
+                                    Chấp nhận
+                                </button>
+                            </form>
                             <a th:href="@{/admin/orders/delete/{id}(id=${order.id})}" class="btn btn-sm btn-danger"
                                 onclick="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này?');">Xóa</a>
                         </td>

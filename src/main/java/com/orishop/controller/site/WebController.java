@@ -16,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
-import com.orishop.model.Order;
 import java.util.Map;
 
 @Controller
@@ -240,7 +239,7 @@ public class WebController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage",
-                "Đặt hàng thành công! Mã đơn hàng: " + order.getOrderInfo());
+                "Đặt hàng thành công! Mã đơn hàng: " + order.getId());
         return "redirect:/checkout/success";
     }
 
@@ -333,9 +332,62 @@ public class WebController {
             return "redirect:/auth/login";
         }
 
-        model.addAttribute("orders", orderService.getOrdersByUser(user.getId()));
-        model.addAttribute("orders", orderService.getOrdersByUser(user.getId()));
+        model.addAttribute("orders", orderService.getOrdersByUser(user));
         return "web/order-list";
+    }
+
+    @GetMapping("/user/order/{id}")
+    public String orderDetail(@PathVariable Long id, Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
+
+        com.orishop.model.Order order = orderService.getOrderById(id);
+        if (order == null) {
+            return "redirect:/orders"; // Order not found
+        }
+
+        // Security check: Order must belong to the logged-in user
+        if (!order.getUser().getId().equals(user.getId())) {
+            return "redirect:/orders"; // Access denied
+        }
+
+        model.addAttribute("order", order);
+        return "web/order-detail";
+    }
+
+    @PostMapping("/orders/complete")
+    public String completeOrder(@RequestParam Long orderId, Principal principal,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        try {
+            orderService.completeOrder(orderId);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xác nhận nhận hàng thành công!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/orders";
+    }
+
+    @PostMapping("/orders/return")
+    public String requestReturn(@RequestParam Long orderId, @RequestParam String reason, Principal principal,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        try {
+            orderService.requestReturn(orderId, reason);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi yêu cầu hoàn trả thành công!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/orders";
     }
 
     @GetMapping("/profile")

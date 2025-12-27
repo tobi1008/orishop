@@ -84,44 +84,294 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <h2>Recent Orders</h2>
-        <div class="table-responsive">
-            <table class="table table-striped table-sm">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Date</th>
-                        <th scope="col">Customer</th>
-                        <th scope="col">Total</th>
-                        <th scope="col">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="order : ${recentOrders}">
-                        <td th:text="${order.id}">1001</td>
-                        <td th:text="${#dates.format(order.createdAt, 'yyyy-MM-dd')}">2023-12-01</td>
-                        <td
-                            th:text="${order.shippingName != null ? order.shippingName : (order.user != null ? order.user.fullName : 'Guest')}">
-                            Nguyen Van A</td>
-                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                            500.000 đ</td>
-                        <td>
-                            <span th:class="'badge ' + 
+            <!-- Charts Section -->
+            <div class="row mb-4">
+                <!-- Order Status Chart -->
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Trạng Thái Đơn Hàng</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-pie pt-4 pb-2">
+                                <canvas id="orderStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Chart -->
+                <div class="col-md-8 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                            <h6 class="m-0 font-weight-bold text-primary">Doanh Thu Theo Thời Gian</h6>
+                            <div class="input-group input-group-sm" style="width: 250px;">
+                                <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                                <input type="text" class="form-control" id="revenueDateRange"
+                                    placeholder="Select Date Range">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-area">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // --- 1. Order Status Chart (Doughnut) ---
+                    const ctxStatus = document.getElementById('orderStatusChart').getContext('2d');
+                    let statusChart;
+
+                    function fetchOrderStatusData() {
+                        fetch('/admin/api/dashboard/order-status')
+                            .then(response => response.json())
+                            .then(data => {
+                                const statusTranslations = {
+                                    'PENDING': 'Chờ xử lý',
+                                    'CONFIRMED': 'Đã xác nhận',
+                                    'SHIPPING': 'Đan giao hàng',
+                                    'DELIVERED': 'Đã giao hàng',
+                                    'COMPLETED': 'Hoàn thành',
+                                    'CANCELLED': 'Đã hủy',
+                                    'RETURN_REQUESTED': 'Yêu cầu trả hàng',
+                                    'RETURNED': 'Đã trả hàng'
+                                };
+
+                                const labels = Object.keys(data);
+                                const values = Object.values(data);
+                                const translatedLabels = labels.map(label => statusTranslations[label] || label);
+
+                                // Define colors for each status if needed, or use a palette
+                                const statusColors = {
+                                    'PENDING': '#f6c23e',   // Warning Yellow
+                                    'CONFIRMED': '#4e73df', // Primary Blue
+                                    'SHIPPING': '#36b9cc',  // Info Cyan
+                                    'DELIVERED': '#1cc88a', // Success Green
+                                    'COMPLETED': '#1cc88a', // Success Green
+                                    'CANCELLED': '#e74a3b', // Danger Red
+                                    'RETURN_REQUESTED': '#858796', // Secondary Gray
+                                    'RETURNED': '#5a5c69'   // Dark Gray
+                                };
+
+                                const bgColors = labels.map(label => statusColors[label] || '#d1d3e2');
+
+                                if (statusChart) statusChart.destroy();
+
+                                statusChart = new Chart(ctxStatus, {
+                                    type: 'doughnut',
+                                    data: {
+                                        labels: translatedLabels,
+                                        datasets: [{
+                                            data: values,
+                                            backgroundColor: bgColors,
+                                            hoverBackgroundColor: bgColors,
+                                            hoverBorderColor: "rgba(234, 236, 244, 1)",
+                                        }],
+                                    },
+                                    options: {
+                                        maintainAspectRatio: false,
+                                        tooltips: {
+                                            backgroundColor: "rgb(255,255,255)",
+                                            bodyFontColor: "#858796",
+                                            borderColor: '#dddfeb',
+                                            borderWidth: 1,
+                                            xPadding: 15,
+                                            yPadding: 15,
+                                            displayColors: true,
+                                            caretPadding: 10,
+                                        },
+                                        legend: {
+                                            display: true,
+                                            position: 'bottom'
+                                        },
+                                        cutout: '70%',
+                                    },
+                                });
+                            });
+                    }
+                    fetchOrderStatusData();
+
+
+                    // --- 2. Revenue Chart (Line) & Date Range Picker ---
+                    const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+                    let revenueChart;
+
+                    // Initialize Date Range Picker
+                    const start = moment().subtract(29, 'days');
+                    const end = moment();
+
+                    function cb(start, end) {
+                        $('#revenueDateRange').val(start.format('DD/MM/YYYY') + ' - ' + end.format('DD/MM/YYYY'));
+                        fetchRevenueData(start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD'));
+                    }
+
+                    $('#revenueDateRange').daterangepicker({
+                        startDate: start,
+                        endDate: end,
+                        alwaysShowCalendars: true,
+                        ranges: {
+                            'Hôm nay': [moment(), moment()],
+                            'Hôm qua': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                            '7 ngày qua': [moment().subtract(6, 'days'), moment()],
+                            '30 ngày qua': [moment().subtract(29, 'days'), moment()],
+                            'Tháng này': [moment().startOf('month'), moment().endOf('month')],
+                            'Tháng trước': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                        },
+                        locale: {
+                            format: 'DD/MM/YYYY',
+                            applyLabel: "Áp dụng",
+                            cancelLabel: "Hủy",
+                            fromLabel: "Từ",
+                            toLabel: "Đến",
+                            customRangeLabel: "Tùy chọn",
+                            weekLabel: "W",
+                            daysOfWeek: ["CN", "T2", "T3", "T4", "T5", "T6", "T7"],
+                            monthNames: ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"],
+                            firstDay: 1
+                        }
+                    }, cb);
+
+                    function fetchRevenueData(startDate, endDate) {
+                        fetch(`/admin/api/dashboard/revenue?startDate=${startDate}&endDate=${endDate}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (revenueChart) revenueChart.destroy();
+
+                                revenueChart = new Chart(ctxRevenue, {
+                                    type: 'bar',
+                                    data: {
+                                        labels: data.labels,
+                                        datasets: [{
+                                            label: "Doanh Thu",
+                                            backgroundColor: "#4e73df",
+                                            hoverBackgroundColor: "#2e59d9",
+                                            borderColor: "#4e73df",
+                                            data: data.data,
+                                            barPercentage: 0.6,
+                                        }],
+                                    },
+                                    options: {
+                                        animation: {
+                                            duration: 2000,
+                                            easing: 'easeOutBounce'
+                                        },
+                                        maintainAspectRatio: false,
+                                        layout: {
+                                            padding: {
+                                                left: 10,
+                                                right: 25,
+                                                top: 25,
+                                                bottom: 0
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                grid: {
+                                                    display: false,
+                                                    drawBorder: false
+                                                },
+                                                ticks: {
+                                                    maxTicksLimit: 7
+                                                }
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    maxTicksLimit: 5,
+                                                    padding: 10,
+                                                    // Include a dollar sign in the ticks
+                                                    callback: function (value, index, values) {
+                                                        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                                                    }
+                                                },
+                                                grid: {
+                                                    color: "rgb(234, 236, 244)",
+                                                    zeroLineColor: "rgb(234, 236, 244)",
+                                                    drawBorder: false,
+                                                    borderDash: [2],
+                                                    zeroLineBorderDash: [2]
+                                                }
+                                            },
+                                        },
+                                        plugins: {
+                                            legend: {
+                                                display: false
+                                            },
+                                            tooltip: {
+                                                backgroundColor: "rgb(255,255,255)",
+                                                bodyColor: "#858796",
+                                                titleColor: '#6e707e',
+                                                borderColor: '#dddfeb',
+                                                borderWidth: 1,
+                                                padding: 15,
+                                                displayColors: false,
+                                                intersect: false,
+                                                mode: 'index',
+                                                caretPadding: 10,
+                                                callbacks: {
+                                                    label: function (context) {
+                                                        let label = context.dataset.label || '';
+                                                        if (label) {
+                                                            label += ': ';
+                                                        }
+                                                        if (context.parsed.y !== null) {
+                                                            label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(context.parsed.y);
+                                                        }
+                                                        return label;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+                            });
+                    }
+
+                    // Initial fetch
+                    cb(start, end);
+                });
+            </script>
+
+            <h2>Recent Orders</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${recentOrders}">
+                            <td th:text="${order.id}">1001</td>
+                            <td th:text="${#dates.format(order.createdAt, 'yyyy-MM-dd')}">2023-12-01</td>
+                            <td
+                                th:text="${order.shippingName != null ? order.shippingName : (order.user != null ? order.user.fullName : 'Guest')}">
+                                Nguyen Van A</td>
+                            <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                500.000 đ</td>
+                            <td>
+                                <span th:class="'badge ' + 
                                 (${order.status.name() == 'COMPLETED' || order.status.name() == 'DELIVERED'} ? 'bg-success' : 
                                 (${order.status.name() == 'PENDING'} ? 'bg-warning text-dark' : 
                                 (${order.status.name() == 'CANCELLED'} ? 'bg-danger' : 'bg-secondary')))"
-                                th:text="${order.status}">Completed</span>
-                        </td>
-                    </tr>
-                    <tr th:if="${recentOrders == null || recentOrders.isEmpty()}">
-                        <td colspan="5" class="text-center">No recent others.</td>
-                    </tr>
-                </tbody>
-            </table>
+                                    th:text="${order.status}">Completed</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${recentOrders == null || recentOrders.isEmpty()}">
+                            <td colspan="5" class="text-center">No recent others.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
 </body>
 
 </html>

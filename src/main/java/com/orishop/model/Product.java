@@ -59,4 +59,19 @@ public class Product {
     protected void onCreate() {
         createdAt = new Date();
     }
+
+    public double getAverageRating() {
+        if (reviews == null || reviews.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0;
+        for (Review review : reviews) {
+            sum += review.getRating();
+        }
+        return Math.round((sum / reviews.size()) * 10.0) / 10.0;
+    }
+
+    public int getReviewCount() {
+        return reviews == null ? 0 : reviews.size();
+    }
 }

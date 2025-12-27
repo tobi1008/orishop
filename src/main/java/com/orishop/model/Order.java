@@ -36,12 +36,14 @@ public class Order {
     private String shippingName; // Người nhận
 
     private String paymentMethod; // COD, VNPay...
-    
+
     private boolean paymentStatus; // true = PAID, false = UNPAID
 
     private String note;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private String returnReason;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrderItem> orderItems;
 
     @Temporal(TemporalType.TIMESTAMP)

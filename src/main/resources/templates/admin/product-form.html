@@ -36,12 +36,18 @@
                 </select>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="price" class="form-label">Giá bán (VNĐ)</label>
                 <input type="number" class="form-control" id="price" th:field="*{price}" required min="0">
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label for="discountPrice" class="form-label">Giá khuyến mãi (VNĐ)</label>
+                <input type="number" class="form-control" id="discountPrice" th:field="*{discountPrice}" min="0">
+                <div class="form-text">Để trống nếu không giảm giá</div>
+            </div>
+
+            <div class="col-md-4">
                 <label for="stock" class="form-label">Số lượng kho</label>
                 <input type="number" class="form-control" id="stock" th:field="*{stockQuantity}" required min="0">
             </div>
