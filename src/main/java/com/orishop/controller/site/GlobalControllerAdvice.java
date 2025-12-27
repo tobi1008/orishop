@@ -13,8 +13,9 @@ public class GlobalControllerAdvice {
     private final CategoryRepository categoryRepository;
 
     @ModelAttribute
-    public void addGlobalAttributes(Model model) {
+    public void addGlobalAttributes(Model model, jakarta.servlet.http.HttpServletRequest request) {
         // Luôn có danh sách categories ở mọi trang để render menu
         model.addAttribute("globalCategories", categoryRepository.findAll());
+        model.addAttribute("currentUri", request.getRequestURI());
     }
 }

@@ -27,7 +27,8 @@
                         <div class="list-group list-group-flush">
                             <a href="/profile" class="list-group-item list-group-item-action active">Hồ sơ cá nhân</a>
                             <a href="/orders" class="list-group-item list-group-item-action">Đơn mua</a>
-                            <a href="/recently-viewed" class="list-group-item list-group-item-action">Sản phẩm đã xem</a>
+                            <a href="/recently-viewed" class="list-group-item list-group-item-action">Sản phẩm đã
+                                xem</a>
                         </div>
                     </div>
                 </div>
@@ -70,6 +71,82 @@
                                 <a href="#" class="btn btn-primary"
                                     onclick="alert('Tính năng cập nhật hồ sơ đang được phát triển!')">Chỉnh sửa thông
                                     tin</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Address Book Section -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">Sổ địa chỉ</h4>
+
+                        <!-- Address List -->
+                        <div class="list-group mb-4" th:if="${not #lists.isEmpty(addresses)}">
+                            <div th:each="addr : ${addresses}" class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <p class="mb-1 fw-bold">
+                                            <span th:text="${addr.detailAddress}">Details</span>,
+                                            <span th:text="${addr.ward}">Ward</span>,
+                                            <span th:text="${addr.district}">District</span>,
+                                            <span th:text="${addr.city}">City</span>
+                                        </p>
+                                        <p class="mb-1 small text-muted">SĐT: <span
+                                                th:text="${addr.phoneNumber}">0123456789</span></p>
+                                        <span th:if="${addr.isDefault}" class="badge bg-success">Mặc định</span>
+                                    </div>
+                                    <div class="btn-group">
+                                        <a th:if="${!addr.isDefault}"
+                                            th:href="@{/profile/address/setdefault/{id}(id=${addr.id})}"
+                                            class="btn btn-sm btn-outline-primary">Đặt mặc định</a>
+                                        <a th:href="@{/profile/address/delete/{id}(id=${addr.id})}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này?')">Xóa</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${#lists.isEmpty(addresses)}" class="alert alert-info">
+                            Bạn chưa lưu địa chỉ nào. Hãy thêm địa chỉ mới bên dưới.
+                        </div>
+
+                        <!-- Add New Address Form -->
+                        <h5 class="mb-3">Thêm địa chỉ mới</h5>
+                        <form th:action="@{/profile/address/add}" method="post">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Tỉnh/Thành phố</label>
+                                    <input type="text" class="form-control" name="city" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Quận/Huyện</label>
+                                    <input type="text" class="form-control" name="district" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phường/Xã</label>
+                                    <input type="text" class="form-control" name="ward" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control" name="phoneNumber" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Địa chỉ chi tiết (Số nhà, đường...)</label>
+                                    <input type="text" class="form-control" name="detailAddress" required>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="defaultAddress"
+                                            id="defaultAddress">
+                                        <label class="form-check-label" for="defaultAddress">
+                                            Đặt làm địa chỉ mặc định
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">Lưu địa chỉ</button>
+                                </div>
                             </div>
                         </form>
                     </div>

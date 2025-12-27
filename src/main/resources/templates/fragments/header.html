@@ -28,11 +28,31 @@
 
                     <!-- Main Navigation -->
                     <ul class="nav d-none d-lg-flex">
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/">TRANG CHỦ</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/product">DANH MỤC</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/about">THƯƠNG HIỆU</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/contact">LIÊN HỆ</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 fw-bold" href="/orders">TRA CỨU ĐƠN HÀNG</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-bold" href="/"
+                                th:classappend="${currentUri == '/' ? 'active' : ''}">TRANG
+                                CHỦ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-bold" href="/product"
+                                th:classappend="${currentUri != null && currentUri.startsWith('/product') ? 'active' : ''}">DANH
+                                MỤC</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-bold" href="/about"
+                                th:classappend="${currentUri != null && currentUri.startsWith('/about') ? 'active' : ''}">THƯƠNG
+                                HIỆU</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-bold" href="/contact"
+                                th:classappend="${currentUri != null && currentUri.startsWith('/contact') ? 'active' : ''}">LIÊN
+                                HỆ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link px-3 fw-bold" href="/orders"
+                                th:classappend="${currentUri != null && currentUri.startsWith('/orders') ? 'active' : ''}">TRA
+                                CỨU ĐƠN HÀNG</a>
+                        </li>
                     </ul>
 
                     <!-- Icons: User & Cart -->
@@ -141,6 +161,12 @@
 
             .nav-link:hover {
                 opacity: 0.8;
+            }
+
+            .nav-link.active {
+                color: #d63384 !important;
+                /* Bootstrap variable $pink-500 or similar */
+                border-bottom: 2px solid #d63384;
             }
         </style>
     </header>

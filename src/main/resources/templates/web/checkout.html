@@ -30,10 +30,42 @@
                                     placeholder="09xxxxxxx">
                             </div>
                             <div class="mb-3">
-                                <label for="address" class="form-label">Địa chỉ nhận hàng</label>
+                                <label class="form-label">Địa chỉ nhận hàng</label>
+
+                                <!-- Selection from saved addresses -->
+                                <div th:if="${not #lists.isEmpty(addresses)}" class="mb-3">
+                                    <div class="list-group">
+                                        <label class="list-group-item d-flex gap-2" th:each="addr : ${addresses}">
+                                            <input class="form-check-input flex-shrink-0" type="radio"
+                                                name="selectedAddress"
+                                                th:value="${addr.detailAddress + ', ' + addr.ward + ', ' + addr.district + ', ' + addr.city}"
+                                                th:checked="${addr.isDefault}" th:data-phone="${addr.phoneNumber}"
+                                                onchange="updateAddressFromSelection(this)">
+                                            <span>
+                                                <strong th:text="${addr.detailAddress}">Address</strong><br>
+                                                <small class="text-muted">
+                                                    <span th:text="${addr.ward}">Ward</span>,
+                                                    <span th:text="${addr.district}">District</span>,
+                                                    <span th:text="${addr.city}">City</span>
+                                                </small>
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <div class="form-text">Chọn từ sổ địa chỉ hoặc nhập mới bên dưới.</div>
+                                </div>
+
                                 <textarea class="form-control" id="address" name="address" rows="3" required
-                                    placeholder="Số nhà, đường, phường/xã..."></textarea>
+                                    placeholder="Số nhà, đường, phường/xã..."
+                                    th:text="${addresses != null and not #lists.isEmpty(addresses) ? (addresses.?[isDefault == true].isEmpty() ? '' : (addresses.?[isDefault == true][0].detailAddress + ', ' + addresses.?[isDefault == true][0].ward + ', ' + addresses.?[isDefault == true][0].district + ', ' + addresses.?[isDefault == true][0].city)) : ''}"></textarea>
                             </div>
+
+                            <script>
+                                function updateAddressFromSelection(radio) {
+                                    document.getElementById('address').value = radio.value;
+                                    // Optional: update phone if needed
+                                    // document.getElementById('phone').value = radio.getAttribute('data-phone');
+                                }
+                            </script>
                             <div class="mb-3">
                                 <label for="note" class="form-label">Ghi chú (tùy chọn)</label>
                                 <textarea class="form-control" id="note" name="note" rows="2"

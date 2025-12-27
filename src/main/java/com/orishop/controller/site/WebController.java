@@ -7,7 +7,7 @@ import com.orishop.service.impl.ProductService;
 import com.orishop.service.impl.CartService;
 import com.orishop.service.ReviewService;
 import com.orishop.repository.UserRepository;
-import com.orishop.model.Review;
+
 import com.orishop.model.User;
 import java.security.Principal;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +33,7 @@ public class WebController {
     private final com.orishop.service.VnPayService vnPayService;
     private final com.orishop.service.MoMoService moMoService;
     private final com.orishop.service.impl.RecentlyViewedService recentlyViewedService;
+    private final com.orishop.repository.AddressRepository addressRepository;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -79,41 +80,6 @@ public class WebController {
         populateFlashSaleInfo(java.util.List.of(product));
 
         return "web/product-detail";
-    }
-
-    @PostMapping("/product/review")
-    public String addReview(@RequestParam Long productId,
-            @RequestParam int rating,
-            @RequestParam String comment,
-            Principal principal) {
-        if (principal == null) {
-            return "redirect:/auth/login";
-        }
-
-        Product product = productService.getProductById(productId).orElse(null);
-        if (product == null) {
-            return "redirect:/";
-        }
-
-        User user = userRepository.findByEmail(principal.getName()).orElse(null);
-        if (user == null) {
-            return "redirect:/auth/login";
-        }
-
-        Review review = new Review();
-        review.setProduct(product);
-        review.setUser(user);
-        review.setRating(rating);
-        review.setComment(comment);
-
-        reviewService.saveReview(review);
-
-        String slug = product.getSlug();
-        if (slug == null || slug.isEmpty()) {
-            slug = String.valueOf(product.getId());
-        }
-
-        return "redirect:/product/" + slug;
     }
 
     @GetMapping("/product")
@@ -222,10 +188,19 @@ public class WebController {
 
     // --- Checkout ---
     @GetMapping("/checkout")
-    public String checkoutForm(Model model) {
+    public String checkoutForm(Model model, Principal principal) {
         if (cartService.getCart().isEmpty()) {
             return "redirect:/cart";
         }
+
+        if (principal != null) {
+            User user = userRepository.findByEmail(principal.getName()).orElse(null);
+            if (user != null) {
+                model.addAttribute("user", user);
+                model.addAttribute("addresses", addressRepository.findByUser(user));
+            }
+        }
+
         model.addAttribute("cartItems", cartService.getCart());
         model.addAttribute("cartTotal", cartService.getCartTotal());
         model.addAttribute("discountAmount", cartService.getDiscountAmount());
@@ -240,7 +215,8 @@ public class WebController {
             @RequestParam(required = false) String note,
             @RequestParam(defaultValue = "COD") String paymentMethod,
             Principal principal,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
 
         User user = null;
         if (principal != null) {
@@ -263,6 +239,8 @@ public class WebController {
             }
         }
 
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đặt hàng thành công! Mã đơn hàng: " + order.getOrderInfo());
         return "redirect:/checkout/success";
     }
 
@@ -288,6 +266,7 @@ public class WebController {
                 orderService.updatePaymentStatus(refId, true);
             } catch (NumberFormatException e) {
             }
+            model.addAttribute("successMessage", "Thanh toán VNPay thành công!");
             return "web/order-success";
         } else {
             return "web/order-fail";
@@ -316,6 +295,7 @@ public class WebController {
                 orderService.updatePaymentStatus(orderId, true);
             } catch (Exception e) {
             }
+            model.addAttribute("successMessage", "Thanh toán MoMo thành công!");
             return "web/order-success";
         } else {
             return "web/order-fail";
@@ -368,7 +348,71 @@ public class WebController {
             return "redirect:/auth/login";
         }
         model.addAttribute("user", user);
+        model.addAttribute("addresses", addressRepository.findByUser(user));
         return "web/profile";
+    }
+
+    @PostMapping("/profile/address/add")
+    public String addAddress(@ModelAttribute com.orishop.model.Address address,
+            @RequestParam(defaultValue = "false") boolean defaultAddress,
+            Principal principal,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (principal == null)
+            return "redirect:/auth/login";
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+        if (user == null)
+            return "redirect:/auth/login";
+
+        address.setUser(user);
+
+        if (addressRepository.findByUser(user).isEmpty()) {
+            address.setDefault(true);
+        } else if (defaultAddress) {
+            // Unset other defaults
+            java.util.List<com.orishop.model.Address> addresses = addressRepository.findByUser(user);
+            for (com.orishop.model.Address addr : addresses) {
+                addr.setDefault(false);
+            }
+            addressRepository.saveAll(addresses);
+            address.setDefault(true);
+        }
+
+        addressRepository.save(address);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm địa chỉ thành công!");
+        return "redirect:/profile";
+    }
+
+    @GetMapping("/profile/address/delete/{id}")
+    public String deleteAddress(@PathVariable Long id, Principal principal) {
+        if (principal == null)
+            return "redirect:/auth/login";
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+
+        com.orishop.model.Address address = addressRepository.findById(id).orElse(null);
+        if (address != null && address.getUser().getId().equals(user.getId())) {
+            addressRepository.delete(address);
+        }
+        return "redirect:/profile";
+    }
+
+    @GetMapping("/profile/address/setdefault/{id}")
+    public String setDefaultAddress(@PathVariable Long id, Principal principal) {
+        if (principal == null)
+            return "redirect:/auth/login";
+        User user = userRepository.findByEmail(principal.getName()).orElse(null);
+
+        com.orishop.model.Address address = addressRepository.findById(id).orElse(null);
+        if (address != null && address.getUser().getId().equals(user.getId())) {
+            java.util.List<com.orishop.model.Address> addresses = addressRepository.findByUser(user);
+            for (com.orishop.model.Address addr : addresses) {
+                addr.setDefault(false);
+            }
+            addressRepository.saveAll(addresses);
+
+            address.setDefault(true);
+            addressRepository.save(address);
+        }
+        return "redirect:/profile";
     }
 
     @GetMapping("/recently-viewed")
