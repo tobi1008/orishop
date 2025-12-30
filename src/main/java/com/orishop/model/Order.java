@@ -49,8 +49,18 @@ public class Order {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    @Column(unique = true)
+    private String orderCode;
+
     @PrePersist
     protected void onCreate() {
         createdAt = new Date();
+        if (orderCode == null) {
+            // Generate random order code: ORD + timestamp(last 6) + random(3 chars)
+            long timestamp = System.currentTimeMillis();
+            String timePart = String.valueOf(timestamp).substring(7); // Last 6 digits roughly
+            String randomPart = java.util.UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+            orderCode = "ORD" + timePart + randomPart;
+        }
     }
 }

@@ -22,5 +22,7 @@ public interface OrderService {
 
     void completeOrder(Long orderId);
 
-    void requestReturn(Long orderId, String reason);
+    void requestReturn(Long orderId, String reason, String accountNumber);
+
+    void cancelOrder(Long orderId, String reason, String accountNumber);
 }

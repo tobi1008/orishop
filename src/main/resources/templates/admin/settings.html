@@ -121,22 +121,32 @@
                     <!-- Social Section -->
                     <h4 class="mb-3">Mạng xã hội</h4>
                     <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label for="contact_zalo" class="form-label">Zalo Link</label>
+                            <input type="text" class="form-control" id="contact_zalo" name="contact_zalo"
+                                th:value="${settings.get('contact_zalo')}" placeholder="https://zalo.me/...">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="contact_telegram" class="form-label">Telegram Link</label>
+                            <input type="text" class="form-control" id="contact_telegram" name="contact_telegram"
+                                th:value="${settings.get('contact_telegram')}" placeholder="https://t.me/...">
+                        </div>
+                        <div class="col-md-4 mb-3">
                             <label for="social_facebook" class="form-label">Facebook URL</label>
                             <input type="text" class="form-control" id="social_facebook" name="social_facebook"
                                 th:value="${settings.get('social_facebook')}">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="social_instagram" class="form-label">Instagram URL</label>
                             <input type="text" class="form-control" id="social_instagram" name="social_instagram"
                                 th:value="${settings.get('social_instagram')}">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="social_youtube" class="form-label">Youtube URL</label>
                             <input type="text" class="form-control" id="social_youtube" name="social_youtube"
                                 th:value="${settings.get('social_youtube')}">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label for="social_tiktok" class="form-label">TikTok URL</label>
                             <input type="text" class="form-control" id="social_tiktok" name="social_tiktok"
                                 th:value="${settings.get('social_tiktok')}">

@@ -58,6 +58,87 @@
         /*]]>*/
     </script>
 
+    <!-- Floating Contact Widget -->
+    <div class="position-fixed bottom-0 end-0 p-4 z-3" th:if="${settings != null}" style="z-index: 1050;">
+        <div class="d-flex flex-column align-items-end gap-2 mb-2 d-none" id="contact-widget-list">
+
+            <!-- Facebook/Messenger -->
+            <a th:if="${settings.get('social_facebook') != null && !settings.get('social_facebook').isEmpty()}"
+                th:href="${settings.get('social_facebook')}" target="_blank"
+                class="btn text-white rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 widget-btn"
+                style="width: 50px; height: 50px; background-color: #0084FF;">
+                <i class="fab fa-facebook-messenger fs-4"></i>
+            </a>
+
+            <!-- Telegram -->
+            <a th:if="${settings.get('contact_telegram') != null && !settings.get('contact_telegram').isEmpty()}"
+                th:href="${settings.get('contact_telegram')}" target="_blank"
+                class="btn text-white rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 widget-btn"
+                style="width: 50px; height: 50px; background-color: #0088cc;">
+                <i class="fab fa-telegram-plane fs-4"></i>
+            </a>
+
+            <!-- Zalo -->
+            <a th:if="${settings.get('contact_zalo') != null && !settings.get('contact_zalo').isEmpty()}"
+                th:href="${settings.get('contact_zalo')}" target="_blank"
+                class="btn text-white rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0 widget-btn fw-bold font-monospace"
+                style="width: 50px; height: 50px; background-color: #0068FF; font-size: 14px;">
+                Zalo
+            </a>
+
+        </div>
+
+        <button
+            class="btn btn-primary rounded-circle shadow-lg d-flex align-items-center justify-content-center position-relative border-0"
+            onclick="toggleContactWidget()"
+            style="width: 60px; height: 60px; background: linear-gradient(45deg, #FF512F, #DD2476);">
+            <i class="fas fa-comments text-white fs-3" id="widget-icon"></i>
+            <i class="fas fa-times text-white fs-3 d-none" id="widget-close-icon"></i>
+
+            <!-- Ripple Animation -->
+            <span class="position-absolute top-0 start-0 w-100 h-100 rounded-circle bg-danger opacity-50"
+                style="animation: ripple 2s infinite; z-index: -1;"></span>
+        </button>
+    </div>
+
+    <script>
+        function toggleContactWidget() {
+            var list = document.getElementById('contact-widget-list');
+            var icon = document.getElementById('widget-icon');
+            var closeIcon = document.getElementById('widget-close-icon');
+
+            if (list.classList.contains('d-none')) {
+                list.classList.remove('d-none');
+                list.classList.add('animate__animated', 'animate__fadeInUp');
+                icon.classList.add('d-none');
+                closeIcon.classList.remove('d-none');
+            } else {
+                list.classList.add('d-none');
+                list.classList.remove('animate__animated', 'animate__fadeInUp');
+                icon.classList.remove('d-none');
+                closeIcon.classList.add('d-none');
+            }
+        }
+    </script>
+    <style>
+        @keyframes ripple {
+            0% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        .widget-btn:hover {
+            transform: scale(1.1);
+            transition: transform 0.2s;
+        }
+    </style>
+
     <th:block layout:fragment="script"></th:block>
 </body>
 

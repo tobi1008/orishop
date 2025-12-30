@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.List;
+import java.util.ArrayList;
 
 @Controller
 @RequiredArgsConstructor
@@ -33,6 +36,7 @@ public class WebController {
     private final com.orishop.service.MoMoService moMoService;
     private final com.orishop.service.impl.RecentlyViewedService recentlyViewedService;
     private final com.orishop.repository.AddressRepository addressRepository;
+    private final com.orishop.service.CouponService couponService;
 
     @GetMapping("/")
     public String home(Model model) {
@@ -40,16 +44,43 @@ public class WebController {
         populateFlashSaleInfo(products);
         model.addAttribute("products", products);
 
-        java.util.List<Product> bestSellers = productService.getBestSellingProducts(10);
+        java.util.List<Product> bestSellers = productService.getBestSellingProducts(5);
         populateFlashSaleInfo(bestSellers);
         model.addAttribute("bestSellers", bestSellers);
 
         model.addAttribute("activeFlashSales", flashSaleService.findActiveFlashSales(new java.util.Date()));
+        model.addAttribute("coupons", couponService.getAllCoupons());
+
+        // Latest Products for Banner
+        model.addAttribute("bannerLatestProducts", productService.getLatestProducts(3));
+
+        // Flash Sale Products for Banner
+        java.util.List<com.orishop.model.FlashSale> activeSales = flashSaleService
+                .findActiveFlashSales(new java.util.Date());
+        List<com.orishop.model.FlashSaleProduct> bannerFlashSaleProducts = new ArrayList<>();
+        if (activeSales != null && !activeSales.isEmpty()) {
+            for (com.orishop.model.FlashSale sale : activeSales) {
+                if (sale.getFlashSaleProducts() != null) {
+                    bannerFlashSaleProducts.addAll(sale.getFlashSaleProducts());
+                }
+            }
+        }
+        // Limit to 3
+        if (bannerFlashSaleProducts.size() > 3) {
+            bannerFlashSaleProducts = bannerFlashSaleProducts.subList(0, 3);
+        }
+        model.addAttribute("bannerFlashSaleProducts", bannerFlashSaleProducts);
+
         return "web/index"; // templates/web/index.html
     }
 
     @GetMapping("/product/{slug}")
-    public String productDetail(@PathVariable String slug, Model model, Principal principal) {
+    public String productDetail(@PathVariable String slug, Model model, Principal principal,
+            HttpServletRequest request) {
+        // Force session creation to avoid "response committed" error during CSRF
+        // generation in view
+        request.getSession(true);
+
         Product product = productService.getProductBySlug(slug).orElse(null);
 
         if (product == null) {
@@ -119,6 +150,28 @@ public class WebController {
         model.addAttribute("products", products);
         model.addAttribute("currentCategory", category);
         return "web/product-list";
+    }
+
+    // --- Flash Sale Page ---
+    @GetMapping("/flash-sale")
+    public String flashSalePage(Model model) {
+        java.util.List<com.orishop.model.FlashSale> activeSales = flashSaleService
+                .findActiveFlashSales(new java.util.Date());
+
+        // Flatten all products from all active sales
+        List<com.orishop.model.FlashSaleProduct> flashSaleProducts = new ArrayList<>();
+        if (activeSales != null && !activeSales.isEmpty()) {
+            for (com.orishop.model.FlashSale sale : activeSales) {
+                if (sale.getFlashSaleProducts() != null) {
+                    flashSaleProducts.addAll(sale.getFlashSaleProducts());
+                }
+            }
+            // Pass the first active sale for timer if needed, or just finding max end time
+            model.addAttribute("flashSale", activeSales.get(0));
+        }
+
+        model.addAttribute("flashSaleProducts", flashSaleProducts);
+        return "web/flash-sale";
     }
 
     // --- Cart Actions ---
@@ -239,7 +292,8 @@ public class WebController {
         }
 
         redirectAttributes.addFlashAttribute("successMessage",
-                "Đặt hàng thành công! Mã đơn hàng: " + order.getId());
+                "Đặt hàng thành công! Mã đơn hàng: "
+                        + (order.getOrderCode() != null ? order.getOrderCode() : order.getId()));
         return "redirect:/checkout/success";
     }
 
@@ -376,14 +430,36 @@ public class WebController {
     }
 
     @PostMapping("/orders/return")
-    public String requestReturn(@RequestParam Long orderId, @RequestParam String reason, Principal principal,
+    public String requestReturn(@RequestParam Long orderId, @RequestParam String reason,
+            @RequestParam String accountNumber,
+            Principal principal,
             org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
         if (principal == null) {
             return "redirect:/auth/login";
         }
         try {
-            orderService.requestReturn(orderId, reason);
+            orderService.requestReturn(orderId, reason, accountNumber);
             redirectAttributes.addFlashAttribute("successMessage", "Đã gửi yêu cầu hoàn trả thành công!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/orders";
+    }
+
+    @PostMapping("/orders/cancel")
+    public String cancelOrder(@RequestParam Long orderId, @RequestParam(required = false) String reason,
+            @RequestParam(required = false) String accountNumber,
+            Principal principal,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        try {
+            if (reason == null || reason.trim().isEmpty()) {
+                reason = "Không có lý do";
+            }
+            orderService.cancelOrder(orderId, reason, accountNumber);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi yêu cầu hủy đơn hàng thành công!");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }

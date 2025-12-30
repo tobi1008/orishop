@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>Siêu Flash Sale - OriShop</title>
+    <style>
+        @keyframes flash {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(1.1);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content" class="bg-light pb-5">
+
+        <!-- Header Banner -->
+        <div class="container-fluid py-5 mb-4 text-white text-center position-relative"
+            style="background: linear-gradient(45deg, #FF512F, #DD2476);">
+            <div class="container position-relative z-2">
+                <h1 class="display-4 fw-bold mb-2 font-heading fst-italic text-uppercase">
+                    <i class="fa fa-bolt me-2 text-warning" style="animation: flash 1s infinite;"></i>SIÊU FLASH SALE
+                </h1>
+                <p class="fs-4 mb-4 fw-light">Săn deal chớp nhoáng - Ưu đãi sập sàn</p>
+
+                <div class="d-flex justify-content-center align-items-center gap-3" th:if="${flashSale != null}">
+                    <span class="text-uppercase fw-bold">Kết thúc sau:</span>
+                    <div class="d-flex align-items-center gap-2 font-monospace fw-bold fs-3"
+                        id="flash-countdown-blocks-page">
+                        <div class="bg-dark rounded px-3 py-2" id="page-timer-hours">00</div>
+                        <span class="text-white">:</span>
+                        <div class="bg-dark rounded px-3 py-2" id="page-timer-minutes">00</div>
+                        <span class="text-white">:</span>
+                        <div class="bg-dark rounded px-3 py-2" id="page-timer-seconds">00</div>
+                    </div>
+                </div>
+                <div class="mt-3" th:unless="${flashSale != null}">
+                    <span class="badge bg-dark fs-5">Đã kết thúc</span>
+                </div>
+            </div>
+            <div class="position-absolute top-0 start-0 w-100 h-100"
+                style="background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);">
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3"
+                th:if="${flashSaleProducts != null && !flashSaleProducts.isEmpty()}">
+                <div class="col" th:each="fsp : ${flashSaleProducts}">
+                    <div class="card h-100 border hover-shadow transition-all position-relative overflow-hidden">
+
+                        <!-- Badges -->
+                        <div class="position-absolute top-0 start-0 m-2 z-1">
+                            <span class="badge bg-danger rounded-0">HOT</span>
+                        </div>
+                        <!-- Discount Bubble -->
+                        <div class="position-absolute top-0 end-0 m-2 z-1 bg-warning rounded-circle d-flex flex-column align-items-center justify-content-center shadow-sm"
+                            style="width: 45px; height: 45px; line-height: 1;">
+                            <span class="text-danger fw-bold small"
+                                th:text="${'-' + ((1 - fsp.salePrice.doubleValue() / fsp.product.price.doubleValue()) * 100).intValue() + '%'}">-50%</span>
+                        </div>
+
+                        <a th:href="@{/product/{slug}(slug=${fsp.product.slug})}" class="text-decoration-none">
+                            <div class="ratio ratio-1x1 bg-light">
+                                <img th:src="${fsp.product.images != null && !fsp.product.images.isEmpty() ? fsp.product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
+                                    class="card-img-top object-fit-cover" alt="Product Image">
+                            </div>
+                        </a>
+
+                        <div class="card-body p-2 d-flex flex-column">
+                            <a th:href="@{/product/{slug}(slug=${fsp.product.slug})}"
+                                class="text-decoration-none text-dark mb-2">
+                                <h6 class="card-title text-truncate small mb-1" th:text="${fsp.product.name}">Product
+                                    Name</h6>
+                            </a>
+
+                            <div class="mt-auto">
+                                <div class="d-flex align-items-baseline gap-1 flex-wrap mb-2">
+                                    <span class="text-danger fw-bold fs-5"
+                                        th:text="${#numbers.formatDecimal(fsp.salePrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">100.000đ</span>
+                                    <span class="text-muted text-decoration-line-through small"
+                                        th:text="${#numbers.formatDecimal(fsp.product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">200.000đ</span>
+                                </div>
+
+                                <!-- Progress Bar -->
+                                <div class="position-relative w-100 rounded-pill overflow-hidden"
+                                    style="height: 16px; background-color: #ffbda6;">
+                                    <!-- Random progress for demo -->
+                                    <div class="h-100 rounded-pill bg-danger" style="width: 85%;"></div>
+                                    <span class="position-absolute top-50 start-50 translate-middle text-white fw-bold"
+                                        style="font-size: 10px; text-shadow: 0 0 2px rgba(0,0,0,0.5);">ĐÃ BÁN 85%</span>
+                                </div>
+
+                                <a th:href="@{/product/{slug}(slug=${fsp.product.slug})}"
+                                    class="btn btn-danger w-100 mt-2 btn-sm fw-bold">MUA NGAY</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center py-5" th:if="${flashSaleProducts == null || flashSaleProducts.isEmpty()}">
+                <h3 class="text-muted">Hiện tại không có chương trình Flash Sale nào đang diễn ra.</h3>
+                <a href="/" class="btn btn-primary mt-3">Quay lại trang chủ</a>
+            </div>
+        </div>
+
+        <!-- Timer Script -->
+        <script th:inline="javascript" th:if="${flashSale != null}">
+            (function () {
+                const endTime = [[${ flashSale.endTime.time }]];
+
+                function updateTimer() {
+                    const now = new Date().getTime();
+                    const distance = endTime - now;
+
+                    if (distance < 0) {
+                        const timerContainer = document.getElementById("flash-countdown-blocks-page");
+                        if (timerContainer) timerContainer.innerHTML = "<span class='text-white bg-dark px-3 py-2 rounded'>ĐÃ KẾT THÚC</span>";
+                        return;
+                    }
+
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    const hEl = document.getElementById("page-timer-hours");
+                    const mEl = document.getElementById("page-timer-minutes");
+                    const sEl = document.getElementById("page-timer-seconds");
+
+                    if (hEl) hEl.innerText = (hours < 10 ? "0" + hours : hours);
+                    if (mEl) mEl.innerText = (minutes < 10 ? "0" + minutes : minutes);
+                    if (sEl) sEl.innerText = (seconds < 10 ? "0" + seconds : seconds);
+                }
+
+                setInterval(updateTimer, 1000);
+                updateTimer();
+            })();
+        </script>
+    </div>
+</body>
+
+</html>

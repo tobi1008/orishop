@@ -56,19 +56,28 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // 3. Tạo Order Items & Trừ tồn kho (nếu muốn)
+        // 3. Tạo Order Items & Trừ tồn kho
         for (CartItem item : cartItems) {
             Product product = productRepository.findById(item.getProductId()).orElse(null);
 
-            OrderItem orderItem = new OrderItem();
-            orderItem.setOrder(savedOrder);
-            orderItem.setProduct(product);
-            orderItem.setQuantity(item.getQuantity());
-            orderItem.setPrice(item.getPrice());
+            if (product != null) {
+                // Check stock
+                if (product.getStockQuantity() < item.getQuantity()) {
+                    throw new RuntimeException("Sản phẩm " + product.getName() + " không đủ hàng (Hiện có: "
+                            + product.getStockQuantity() + ")");
+                }
+                // Deduct stock
+                product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
+                productRepository.save(product);
 
-            orderItemRepository.save(orderItem);
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(savedOrder);
+                orderItem.setProduct(product);
+                orderItem.setQuantity(item.getQuantity());
+                orderItem.setPrice(item.getPrice());
 
-            // TODO: Trừ tồn kho product (product.setStockQuantity...)
+                orderItemRepository.save(orderItem);
+            }
         }
 
         return savedOrder;
@@ -90,10 +99,26 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updateOrderStatus(Long orderId, com.orishop.model.OrderStatus status) {
+    public void updateOrderStatus(Long orderId, com.orishop.model.OrderStatus newStatus) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order != null) {
-            order.setStatus(status);
+            OrderStatus oldStatus = order.getStatus();
+
+            // Logic Restore Stock: If cancelling/returning AND previously stock was held
+            boolean isStockHeld = (oldStatus != OrderStatus.CANCELLED && oldStatus != OrderStatus.RETURNED);
+            boolean isCancelling = (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.RETURNED);
+
+            if (isStockHeld && isCancelling) {
+                for (OrderItem item : order.getOrderItems()) {
+                    Product p = item.getProduct();
+                    if (p != null) {
+                        p.setStockQuantity(p.getStockQuantity() + item.getQuantity());
+                        productRepository.save(p);
+                    }
+                }
+            }
+
+            order.setStatus(newStatus);
             orderRepository.save(order);
         }
     }
@@ -119,14 +144,57 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void requestReturn(Long orderId, String reason) {
+    public void requestReturn(Long orderId, String reason, String accountNumber) {
         Order order = orderRepository.findById(orderId).orElse(null);
         if (order != null && order.getStatus() == OrderStatus.COMPLETED) {
             order.setStatus(OrderStatus.RETURN_REQUESTED);
-            order.setReturnReason(reason);
+
+            String fullReason = reason;
+            if (accountNumber != null && !accountNumber.trim().isEmpty()) {
+                fullReason += " | STK: " + accountNumber;
+            }
+            order.setReturnReason(fullReason);
+
             orderRepository.save(order);
         } else {
             throw new RuntimeException("Chỉ có thể yêu cầu hoàn trả khi đơn hàng đã hoàn thành!");
+        }
+    }
+
+    @Override
+    public void cancelOrder(Long orderId, String reason, String accountNumber) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+        if (order == null) {
+            throw new RuntimeException("Không tìm thấy đơn hàng!");
+        }
+
+        // Chỉ cho phép hủy khi đang PENDING hoặc CONFIRMED
+        if (order.getStatus() == OrderStatus.PENDING || order.getStatus() == OrderStatus.CONFIRMED) {
+            String fullReason = reason;
+            if (accountNumber != null && !accountNumber.trim().isEmpty()) {
+                fullReason += " | STK: " + accountNumber;
+            }
+
+            if (order.isPaymentStatus()) {
+                // Đã thanh toán -> chuyển sang yêu cầu hoàn tiền
+                order.setStatus(OrderStatus.REFUND_REQUESTED);
+                order.setReturnReason(fullReason);
+            } else {
+                // Chưa thanh toán -> hủy luôn -> RESTORE STOCK
+                order.setStatus(OrderStatus.CANCELLED);
+                order.setReturnReason(fullReason);
+
+                for (OrderItem item : order.getOrderItems()) {
+                    Product p = item.getProduct();
+                    if (p != null) {
+                        p.setStockQuantity(p.getStockQuantity() + item.getQuantity());
+                        productRepository.save(p);
+                    }
+                }
+            }
+            orderRepository.save(order);
+        } else {
+            throw new RuntimeException("Không thể hủy đơn hàng ở trạng thái này!");
         }
     }
 }

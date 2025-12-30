@@ -11,11 +11,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 public class GlobalControllerAdvice {
 
     private final CategoryRepository categoryRepository;
+    private final com.orishop.service.SettingService settingService;
 
     @ModelAttribute
     public void addGlobalAttributes(Model model, jakarta.servlet.http.HttpServletRequest request) {
         // Luôn có danh sách categories ở mọi trang để render menu
         model.addAttribute("globalCategories", categoryRepository.findAll());
         model.addAttribute("currentUri", request.getRequestURI());
+        model.addAttribute("settings", settingService.getAllSettings());
     }
 }

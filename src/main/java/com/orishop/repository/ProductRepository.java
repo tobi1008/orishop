@@ -17,8 +17,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")
     List<Product> searchByName(@Param("keyword") String keyword);
 
-    @Query("SELECT oi.product FROM OrderItem oi WHERE oi.order.status = :status GROUP BY oi.product ORDER BY SUM(oi.quantity) DESC")
-    List<Product> findBestSellingProducts(@Param("status") com.orishop.model.OrderStatus status, Pageable pageable);
+    @Query("SELECT oi.product FROM OrderItem oi WHERE oi.order.status IN :statuses GROUP BY oi.product ORDER BY SUM(oi.quantity) DESC")
+    List<Product> findBestSellingProducts(@Param("statuses") java.util.List<com.orishop.model.OrderStatus> statuses,
+            Pageable pageable);
 
     Page<Product> findAll(Pageable pageable);
 }

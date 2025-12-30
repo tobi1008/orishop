@@ -42,6 +42,11 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link"
+                    th:classappend="${currentStatus != null && currentStatus.name() == 'REFUND_REQUESTED'} ? 'active'"
+                    href="/admin/orders?status=REFUND_REQUESTED">Yêu cầu hoàn tiền</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link"
                     th:classappend="${currentStatus != null && currentStatus.name() == 'RETURNED'} ? 'active'"
                     href="/admin/orders?status=RETURNED">Đã hoàn trả</a>
             </li>
@@ -60,18 +65,29 @@
                         <th>Ngày đặt</th>
                         <th>Khách hàng</th>
                         <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="order : ${orders}">
-                        <td th:text="${order.id}">#123</td>
+                        <td th:text="${order.orderCode} ?: ${order.id}">#123</td>
                         <td th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}">Date</td>
                         <td
                             th:text="${order.shippingName != null ? order.shippingName : (order.user != null ? order.user.fullName : 'Khách lẻ')}">
                             Customer</td>
                         <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">Total
+                        </td>
+                        <td>
+                            <form th:action="@{/admin/orders/update-payment-status}" method="post">
+                                <input type="hidden" name="id" th:value="${order.id}">
+                                <input type="hidden" name="paymentStatus" th:value="${!order.paymentStatus}">
+                                <button type="submit"
+                                    th:class="'btn btn-sm ' + (${order.paymentStatus} ? 'btn-success' : 'btn-warning')"
+                                    th:text="${order.paymentStatus} ? 'Đã thanh toán' : 'Chưa thanh toán'">
+                                </button>
+                            </form>
                         </td>
                         <td>
                             <span th:class="'badge ' +
@@ -81,14 +97,16 @@
                                 (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 
                                 (${order.status.name() == 'COMPLETED'} ? 'bg-success' : 
                                 (${order.status.name() == 'RETURN_REQUESTED'} ? 'bg-warning text-dark' :
-                                (${order.status.name() == 'RETURNED'} ? 'bg-secondary' : 'bg-danger')))))))"
+                                (${order.status.name() == 'REFUND_REQUESTED'} ? 'bg-danger text-light' :
+                                (${order.status.name() == 'RETURNED'} ? 'bg-secondary' : 'bg-danger'))))))))"
                                 th:text="${order.status.name() == 'PENDING' ? 'Chờ xử lý' : 
                                           (order.status.name() == 'CONFIRMED' ? 'Đã xác nhận' :
                                           (order.status.name() == 'SHIPPING' ? 'Đang giao' :
                                           (order.status.name() == 'DELIVERED' ? 'Đã giao' :
                                           (order.status.name() == 'COMPLETED' ? 'Hoàn thành' : 
                                           (order.status.name() == 'RETURN_REQUESTED' ? 'Yêu cầu hoàn trả' :
-                                          (order.status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy'))))))}">PENDING</span>
+                                          (order.status.name() == 'REFUND_REQUESTED' ? 'Yêu cầu hoàn tiền' :
+                                          (order.status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy')))))))}">PENDING</span>
                         </td>
                         <td>
                             <a th:href="@{/admin/orders/{id}(id=${order.id})}" class="btn btn-sm btn-info">Chi tiết</a>

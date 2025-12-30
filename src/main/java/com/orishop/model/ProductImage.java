@@ -19,7 +19,7 @@ public class ProductImage {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "image_url", nullable = false)
+    @Column(name = "image_url", columnDefinition = "TEXT", nullable = false)
     private String imageUrl;
 
     // Đánh dấu ảnh đại diện chính

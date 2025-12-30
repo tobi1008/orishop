@@ -54,7 +54,7 @@
                                 </thead>
                                 <tbody>
                                     <tr th:each="order : ${orders}">
-                                        <td>#<span th:text="${order.id}">123</span></td>
+                                        <td>#<span th:text="${order.orderCode} ?: ${order.id}">123</span></td>
                                         <td th:text="${#dates.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2025
                                         </td>
                                         <td>
@@ -66,14 +66,16 @@
                                                 (${order.status.name() == 'DELIVERED'} ? 'bg-success' : 
                                                 (${order.status.name() == 'COMPLETED'} ? 'bg-success' : 
                                                 (${order.status.name() == 'RETURN_REQUESTED'} ? 'bg-warning text-dark' :
-                                                (${order.status.name() == 'RETURNED'} ? 'bg-secondary' : 'bg-danger')))))))"
+                                                (${order.status.name() == 'REFUND_REQUESTED'} ? 'bg-danger text-light' :
+                                                (${order.status.name() == 'RETURNED'} ? 'bg-secondary' : 'bg-danger'))))))))"
                                                 th:text="${order.status.name() == 'PENDING' ? 'Chờ xử lý' : 
                                                           (order.status.name() == 'CONFIRMED' ? 'Đã xác nhận' :
                                                           (order.status.name() == 'SHIPPING' ? 'Đang giao' :
                                                           (order.status.name() == 'DELIVERED' ? 'Đã giao' :
                                                           (order.status.name() == 'COMPLETED' ? 'Hoàn thành' : 
                                                           (order.status.name() == 'RETURN_REQUESTED' ? 'Yêu cầu hoàn trả' :
-                                                          (order.status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy'))))))}">PENDING</span>
+                                                          (order.status.name() == 'REFUND_REQUESTED' ? 'Yêu cầu hoàn tiền' :
+                                                          (order.status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy')))))))}">PENDING</span>
                                         </td>
                                         <td class="fw-bold"
                                             th:text="${order.totalAmount != null ? #numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'">
@@ -121,12 +123,75 @@
                                                                         rows="3" required
                                                                         placeholder="Vui lòng nhập lý do..."></textarea>
                                                                 </div>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Số tài khoản nhận tiền
+                                                                        (Ngân hàng - Số TK - Chủ TK):</label>
+                                                                    <input type="text" name="accountNumber"
+                                                                        class="form-control" required
+                                                                        placeholder="VD: MB Bank - 0987654321 - NGUYEN VAN A">
+                                                                </div>
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Đóng</button>
                                                                 <button type="submit" class="btn btn-danger">Gửi yêu
                                                                     cầu</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Button for Cancel -->
+                                            <button
+                                                th:if="${order.status.name() == 'PENDING' || order.status.name() == 'CONFIRMED'}"
+                                                class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                                                th:data-bs-target="'#cancelModal' + ${order.id}">
+                                                <span
+                                                    th:text="${order.paymentStatus} ? 'Yêu cầu hoàn tiền' : 'Hủy đơn'">Hủy
+                                                    đơn</span>
+                                            </button>
+
+                                            <!-- Cancel Modal -->
+                                            <div class="modal fade" th:id="'cancelModal' + ${order.id}" tabindex="-1"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title"
+                                                                th:text="${order.paymentStatus} ? 'Yêu cầu hoàn tiền' : 'Hủy đơn hàng'">
+                                                                Hủy đơn hàng</h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <form th:action="@{/orders/cancel}" method="post">
+                                                            <div class="modal-body">
+                                                                <input type="hidden" name="orderId"
+                                                                    th:value="${order.id}">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Lý do:</label>
+                                                                    <textarea name="reason" class="form-control"
+                                                                        rows="3"
+                                                                        placeholder="Vui lòng nhập lý do..."></textarea>
+                                                                </div>
+                                                                <div class="mb-3" th:if="${order.paymentStatus}">
+                                                                    <label class="form-label">Số tài khoản nhận tiền
+                                                                        (Ngân hàng - Số TK - Chủ TK):</label>
+                                                                    <input type="text" name="accountNumber"
+                                                                        class="form-control"
+                                                                        placeholder="VD: MB Bank - 0987654321 - NGUYEN VAN A">
+                                                                </div>
+                                                                <p th:if="${order.paymentStatus}"
+                                                                    class="text-danger small">
+                                                                    * Đơn hàng đã thanh toán. Yêu cầu của bạn sẽ được
+                                                                    gửi đến admin để xử lý hoàn tiền.
+                                                                </p>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Đóng</button>
+                                                                <button type="submit" class="btn btn-danger">Xác
+                                                                    nhận</button>
                                                             </div>
                                                         </form>
                                                     </div>

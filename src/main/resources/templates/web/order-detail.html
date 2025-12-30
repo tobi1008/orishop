@@ -89,14 +89,16 @@
                     <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
                     <li class="breadcrumb-item"><a href="/profile">Tài khoản</a></li>
                     <li class="breadcrumb-item"><a href="/orders">Đơn hàng của tôi</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Đơn hàng #<span th:text="${order.id}"></span>
+                    <li class="breadcrumb-item active" aria-current="page">Đơn hàng #<span
+                            th:text="${order.orderCode} ?: ${order.id}"></span>
                     </li>
                 </ol>
             </nav>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2 class="h3 mb-0 text-gray-800">Chi Tiết Đơn Hàng #<span th:text="${order.id}"></span></h2>
+                    <h2 class="h3 mb-0 text-gray-800">Chi Tiết Đơn Hàng #<span
+                            th:text="${order.orderCode} ?: ${order.id}"></span></h2>
                     <p class="text-muted mb-0">Ngày đặt: <span
                             th:text="${#dates.format(order.createdAt, 'dd/MM/yyyy HH:mm')}"></span></p>
                 </div>
@@ -320,7 +322,8 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Yêu cầu hoàn trả đơn hàng #<span th:text="${order.id}"></span></h5>
+                            <h5 class="modal-title">Yêu cầu hoàn trả đơn hàng #<span
+                                    th:text="${order.orderCode} ?: ${order.id}"></span></h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form th:action="@{/orders/return}" method="post">

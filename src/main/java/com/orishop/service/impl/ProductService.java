@@ -40,8 +40,19 @@ public class ProductService {
     }
 
     public List<Product> getBestSellingProducts(int limit) {
-        return productRepository.findBestSellingProducts(com.orishop.model.OrderStatus.COMPLETED,
+        return productRepository.findBestSellingProducts(
+                java.util.List.of(
+                        com.orishop.model.OrderStatus.CONFIRMED,
+                        com.orishop.model.OrderStatus.SHIPPING,
+                        com.orishop.model.OrderStatus.COMPLETED),
                 org.springframework.data.domain.PageRequest.of(0, limit));
+    }
+
+    public List<Product> getLatestProducts(int limit) {
+        return productRepository.findAll(
+                org.springframework.data.domain.PageRequest.of(0, limit, org.springframework.data.domain.Sort
+                        .by(org.springframework.data.domain.Sort.Direction.DESC, "id")))
+                .getContent();
     }
 
     public Product saveProduct(Product product) {

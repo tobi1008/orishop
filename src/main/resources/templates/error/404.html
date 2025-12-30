@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+    layout:decorate="~{decorators/main}">
+
+<head>
+    <title>404 - Không tìm thấy trang | OriShop</title>
+</head>
+
+<body>
+    <div layout:fragment="content" class="container py-5 my-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <!-- Illustration Icon -->
+                <div class="mb-4 text-muted opacity-50">
+                    <i class="fa fa-ghost fa-5x animate-bounce"></i>
+                </div>
+
+                <h1 class="display-1 fw-bold text-dark mb-0">404</h1>
+                <h2 class="h4 mb-4 text-secondary">Úi! Trang bạn tìm không thấy đâu.</h2>
+                <p class="mb-5 text-muted">
+                    Có vẻ như đường dẫn này bị hỏng hoặc trang đã bị xóa.<br>
+                    Đừng lo, hãy quay lại trang chủ để tiếp tục mua sắm nhé.
+                </p>
+
+                <a href="/" class="btn btn-primary px-5 py-3 rounded-pill shadow-lg hover-scale">
+                    <i class="fa fa-home me-2"></i> Quay về trang chủ
+                </a>
+            </div>
+        </div>
+
+        <style>
+            .animate-bounce {
+                animation: bounce 2s infinite;
+            }
+
+            @keyframes bounce {
+
+                0%,
+                100% {
+                    transform: translateY(0);
+                }
+
+                50% {
+                    transform: translateY(-20px);
+                }
+            }
+
+            .hover-scale:hover {
+                transform: scale(1.05);
+                transition: transform 0.3s;
+            }
+        </style>
+    </div>
+</body>
+
+</html>

@@ -14,6 +14,7 @@ import com.orishop.service.impl.ProductService;
 import com.orishop.service.impl.ProductService;
 import com.orishop.service.ReviewService;
 import com.orishop.service.CouponService;
+import com.orishop.service.OrderService;
 import com.orishop.model.Coupon;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -40,6 +41,7 @@ public class AdminController {
     private final CloudinaryService cloudinaryService;
     private final ProductImageRepository productImageRepository;
     private final ReviewService reviewService;
+    private final OrderService orderService; // Injected OrderService
     private final CouponService couponService;
 
     @GetMapping
@@ -243,12 +245,19 @@ public class AdminController {
 
     @PostMapping("/orders/update-status")
     public String updateOrderStatus(@RequestParam Long id, @RequestParam OrderStatus status) {
+        orderService.updateOrderStatus(id, status);
+        return "redirect:/admin/orders/" + id;
+    }
+
+    @PostMapping("/orders/update-payment-status")
+    public String updatePaymentStatus(@RequestParam Long id, @RequestParam boolean paymentStatus,
+            @RequestHeader(value = "Referer", required = false) String referer) {
         Order order = orderRepository.findById(id).orElse(null);
         if (order != null) {
-            order.setStatus(status);
+            order.setPaymentStatus(paymentStatus);
             orderRepository.save(order);
         }
-        return "redirect:/admin/orders/" + id;
+        return "redirect:" + (referer != null ? referer : "/admin/orders/" + id);
     }
 
     @GetMapping("/orders/delete/{id}")
@@ -383,8 +392,26 @@ public class AdminController {
     }
 
     @PostMapping("/flash-sales")
-    public String saveFlashSale(@ModelAttribute com.orishop.model.FlashSale flashSale) {
-        flashSaleService.saveFlashSale(flashSale);
+    public String saveFlashSale(@ModelAttribute com.orishop.model.FlashSale flashSale,
+            @RequestParam(value = "status", defaultValue = "false") boolean status) {
+        flashSale.setStatus(status); // Explicitly set status from checkbox (or default false if unchecked)
+
+        if (flashSale.getId() != null) {
+            com.orishop.model.FlashSale existing = flashSaleService.getFlashSaleById(flashSale.getId());
+            if (existing != null) {
+                // Update specific fields to avoid overwriting relations if any
+                existing.setName(flashSale.getName());
+                existing.setDescription(flashSale.getDescription());
+                existing.setStartTime(flashSale.getStartTime());
+                existing.setEndTime(flashSale.getEndTime());
+                existing.setStatus(flashSale.isStatus());
+                flashSaleService.saveFlashSale(existing);
+            } else {
+                flashSaleService.saveFlashSale(flashSale);
+            }
+        } else {
+            flashSaleService.saveFlashSale(flashSale);
+        }
         return "redirect:/admin/flash-sales";
     }
 

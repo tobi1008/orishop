@@ -10,7 +10,7 @@
     <div layout:fragment="content">
         <div
             class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-            <h1 class="h2">Chi tiết đơn hàng #<span th:text="${order.id}"></span></h1>
+            <h1 class="h2">Chi tiết đơn hàng #<span th:text="${order.orderCode} ?: ${order.id}"></span></h1>
             <div class="btn-toolbar mb-2 mb-md-0">
                 <a href="/admin/orders" class="btn btn-sm btn-outline-secondary">
                     <i class="fa fa-arrow-left"></i> Quay lại
@@ -38,7 +38,8 @@
                                                   (status.name() == 'DELIVERED' ? 'Đã giao' :
                                                   (status.name() == 'COMPLETED' ? 'Hoàn thành' : 
                                                   (status.name() == 'RETURN_REQUESTED' ? 'Yêu cầu hoàn trả' :
-                                                  (status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy'))))))}"
+                                                  (status.name() == 'REFUND_REQUESTED' ? 'Yêu cầu hoàn tiền' :
+                                                  (status.name() == 'RETURNED' ? 'Đã hoàn trả' : 'Đã hủy')))))))}"
                                     th:selected="${status == order.status}"></option>
                             </select>
                             <button type="submit" class="btn btn-sm btn-primary">Cập nhật</button>
@@ -55,7 +56,28 @@
                                 <i class="fa fa-check"></i> Chấp nhận hoàn trả
                             </button>
                         </form>
+
+                        <!-- Accept Refund Button -->
+                        <form th:if="${order.status.name() == 'REFUND_REQUESTED'}"
+                            th:action="@{/admin/orders/update-status}" method="post" class="mt-2">
+                            <input type="hidden" name="id" th:value="${order.id}">
+                            <input type="hidden" name="status" value="CANCELLED">
+                            <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Xác nhận hoàn tiền và hủy đơn hàng này?')">
+                                <i class="fa fa-check"></i> Chấp nhận hoàn tiền & Hủy đơn
+                            </button>
+                        </form>
                         <p><strong>Phương thức thanh toán:</strong> <span th:text="${order.paymentMethod}">COD</span>
+                        </p>
+                        <p class="d-flex align-items-center"><strong>Trạng thái thanh toán:&nbsp;</strong>
+                        <form th:action="@{/admin/orders/update-payment-status}" method="post" class="d-inline">
+                            <input type="hidden" name="id" th:value="${order.id}">
+                            <input type="hidden" name="paymentStatus" th:value="${!order.paymentStatus}">
+                            <button type="submit"
+                                th:class="'btn btn-sm ' + (${order.paymentStatus} ? 'btn-success' : 'btn-warning')"
+                                th:text="${order.paymentStatus} ? 'Đã thanh toán' : 'Chưa thanh toán'">
+                            </button>
+                        </form>
                         </p>
                         <p><strong>Tổng tiền:</strong> <span class="text-danger fw-bold"
                                 th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>

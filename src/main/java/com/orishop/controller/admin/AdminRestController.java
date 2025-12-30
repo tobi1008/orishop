@@ -86,7 +86,7 @@ public class AdminRestController {
 
                 if (!orderDateTime.isBefore(startDateTime) &&
                         !orderDateTime.isAfter(endDateTime) &&
-                        (order.getStatus() == OrderStatus.COMPLETED || order.getStatus() == OrderStatus.DELIVERED)) {
+                        (order.getStatus() == OrderStatus.COMPLETED)) {
 
                     if (revenueMap.containsKey(orderDate)) {
                         revenueMap.put(orderDate, revenueMap.get(orderDate).add(order.getTotalAmount()));

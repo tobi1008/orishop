@@ -20,51 +20,234 @@
                 </div>
                 <div class="carousel-inner">
                     <div class="carousel-item active">
+                        <div class="d-flex align-items-center justify-content-center position-relative"
+                            style="height: 380px; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);">
+                            <div class="container z-1">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-5 text-white text-md-start text-center mb-4 mb-lg-0">
+                                        <h1 class="display-5 fw-bold mb-3 font-heading text-light"
+                                            style="letter-spacing: 2px;">
+                                            BỘ SƯU TẬP MỚI
+                                        </h1>
+                                        <p class="fs-5 mb-4 opacity-75 fw-light">Đẳng cấp thời thượng<br>Nâng tầm phong
+                                            cách</p>
+                                        <a href="/product"
+                                            class="btn btn-light px-4 py-2 fw-bold rounded-0 text-uppercase shadow-lg hover-lift">
+                                            Khám Phá Ngay
+                                        </a>
+                                    </div>
+                                    <div class="col-lg-7">
+                                        <div class="row row-cols-3 g-3">
+                                            <div class="col" th:each="prod : ${bannerLatestProducts}">
+                                                <div class="card h-100 border-0 shadow-sm overflow-hidden"
+                                                    style="background: rgba(255,255,255,0.1); backdrop-filter: blur(5px);">
+                                                    <a th:href="@{/product/{slug}(slug=${prod.slug})}"
+                                                        class="text-decoration-none">
+                                                        <div class="ratio ratio-1x1 bg-white">
+                                                            <img th:src="${prod.images != null && !prod.images.isEmpty() ? prod.images[0].imageUrl : 'https://via.placeholder.com/150'}"
+                                                                class="card-img-top object-fit-cover" alt="Product">
+                                                        </div>
+                                                        <div class="card-body p-2 text-center">
+                                                            <h6 class="card-title text-white text-truncate small mb-1"
+                                                                th:text="${prod.name}">Product Name</h6>
+                                                            <span class="badge bg-light text-dark shadow-sm"
+                                                                th:text="${#numbers.formatDecimal(prod.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">100.000đ</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Slide 2: Coupon Showcase -->
+                    <div class="carousel-item">
                         <div class="d-flex align-items-center justify-content-center text-white text-center position-relative"
-                            style="height: 600px; background: linear-gradient(45deg, #0f0c29, #302b63, #24243e);">
-                            <div class="z-1 container">
-                                <h1 class="display-3 fw-bold mb-3 font-heading text-light" style="letter-spacing: 2px;">
-                                    BỘ
-                                    SƯU TẬP MỚI</h1>
-                                <p class="fs-4 mb-4 opacity-75 fw-light">Đẳng cấp thời thượng - Nâng tầm phong cách</p>
-                                <a href="/product"
-                                    class="btn btn-light px-5 py-3 fw-bold rounded-0 text-uppercase shadow-lg hover-lift">Khám
-                                    Phá Ngay</a>
+                            style="height: 380px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <div class="container position-relative z-2">
+                                <h1 class="display-5 fw-bold mb-2 font-heading text-uppercase">SĂN VOUCHER HOT</h1>
+                                <p class="fs-6 mb-4 opacity-90">Lấy mã giảm giá ngay để mua sắm tiết kiệm hơn!</p>
+
+                                <div class="row justify-content-center g-3"
+                                    th:if="${coupons != null && !coupons.isEmpty()}">
+                                    <div class="col-md-6 col-lg-4" th:each="coupon, iter : ${coupons}"
+                                        th:if="${iter.index < 3}"> <!-- Show max 3 coupons -->
+                                        <div class="card border-0 shadow-lg text-dark overflow-hidden transform-hover"
+                                            style="border-radius: 15px;">
+                                            <div class="card-body p-3 position-relative">
+                                                <div
+                                                    class="position-absolute top-0 start-0 w-100 h-100 bg-light opacity-25">
+                                                </div> <!-- Overlay for depth -->
+                                                <div class="position-relative z-1">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="badge bg-danger rounded-pill px-2"
+                                                            style="font-size: 0.7rem;">HOT</span>
+                                                        <small class="text-muted fw-bold" style="font-size: 0.7rem;">Số
+                                                            lượng có hạn</small>
+                                                    </div>
+                                                    <h4 class="fw-bold text-primary mb-0" th:text="${coupon.code}">
+                                                        CODE10</h4>
+                                                    <p class="mb-2 text-secondary fw-bold small"
+                                                        th:text="${coupon.discountType == 'PERCENT'} ? 'Giảm ' + ${#numbers.formatDecimal(coupon.discountValue, 0, 'COMMA', 0, 'POINT')} + '%' : 'Giảm ' + ${#numbers.formatDecimal(coupon.discountValue, 0, 'COMMA', 0, 'POINT')} + 'đ'">
+                                                        Giảm 50.000đ</p>
+                                                    <button class="btn btn-dark w-100 rounded-pill copy-btn btn-sm"
+                                                        th:attr="data-code=${coupon.code}"
+                                                        onclick="copyToClipboard(this)">
+                                                        <i class="fa fa-copy me-1"></i>Sao chép
+                                                    </button>
+                                                </div>
+                                                <!-- Decorative circles -->
+                                                <div class="position-absolute top-50 start-0 translate-middle rounded-circle bg-white"
+                                                    style="width: 15px; height: 15px; left: 0;"></div>
+                                                <div class="position-absolute top-50 end-0 translate-middle rounded-circle bg-white"
+                                                    style="width: 15px; height: 15px; right: -15px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3" th:if="${coupons == null || coupons.isEmpty()}">
+                                    <div
+                                        class="alert alert-light d-inline-block px-4 py-2 rounded-pill shadow-sm small">
+                                        <i class="fa fa-ticket me-2 text-warning"></i> Hiện chưa có mã giảm giá nào.
+                                        Quay lại sau nhé!
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Background Pattern -->
+                            <div class="position-absolute top-0 start-0 w-100 h-100"
+                                style="background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 20px 20px;">
                             </div>
                         </div>
                     </div>
+
+                    <!-- Slide 3: Flash Sale Advertisement -->
                     <div class="carousel-item">
-                        <div class="d-flex align-items-center justify-content-center text-white text-center"
-                            style="height: 600px; background: linear-gradient(45deg, #134E5E, #71B280);">
-                            <div class="z-1 container">
-                                <h1 class="display-3 fw-bold mb-3 font-heading">CHĂM SÓC DA TOÀN DIỆN</h1>
-                                <p class="fs-4 mb-4 opacity-75 fw-light">Tinh hoa thiên nhiên - Vẻ đẹp thuần khiết</p>
-                                <a href="/category/skincare"
-                                    class="btn btn-outline-light px-5 py-3 fw-bold rounded-0 text-uppercase shadow-lg hover-lift">Xem
-                                    Chi Tiết</a>
+                        <div class="d-flex align-items-center justify-content-center position-relative"
+                            style="height: 380px; background: linear-gradient(45deg, #FF512F, #DD2476);">
+                            <div class="container z-2">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-5 text-white text-md-start text-center mb-4 mb-lg-0">
+                                        <span
+                                            class="d-inline-block p-2 px-3 bg-white text-danger fw-bold rounded-pill mb-2 shadow-sm animate__animated animate__bounceIn small">
+                                            <i class="fa fa-fire me-2"></i>ĐANG DIỄN RA
+                                        </span>
+                                        <h1 class="display-5 fw-bold mb-2 font-heading fst-italic text-uppercase"
+                                            style="text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">SIÊU FLASH SALE</h1>
+                                        <p class="fs-5 mb-4 fw-light">Săn deal chớp nhoáng<br>Giá rẻ vô địch</p>
+
+                                        <div class="d-flex gap-3 justify-content-md-start justify-content-center">
+                                            <a href="/flash-sale"
+                                                class="btn btn-light px-4 py-2 fw-bold rounded-pill text-danger text-uppercase shadow-lg hover-scale">
+                                                <i class="fa fa-bolt me-2"></i>Săn ngay kẻo lỡ
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-7">
+                                        <div class="row row-cols-3 g-3">
+                                            <!-- If no flash sale products, show placeholders or message, but typically we assume there are -->
+                                            <div class="col" th:each="fsp : ${bannerFlashSaleProducts}">
+                                                <div class="card h-100 border-0 shadow-sm overflow-hidden"
+                                                    style="background: rgba(255,255,255,0.9);">
+                                                    <div
+                                                        class="position-absolute top-0 end-0 m-1 z-1 bg-warning rounded-pill px-2 py-0">
+                                                        <small class="text-danger fw-bold" style="font-size: 0.7rem;"
+                                                            th:text="${'-' + ((1 - fsp.salePrice.doubleValue() / fsp.product.price.doubleValue()) * 100).intValue() + '%'}">-50%</small>
+                                                    </div>
+                                                    <a th:href="@{/product/{slug}(slug=${fsp.product.slug})}"
+                                                        class="text-decoration-none">
+                                                        <div class="ratio ratio-1x1 bg-white">
+                                                            <img th:src="${fsp.product.images != null && !fsp.product.images.isEmpty() ? fsp.product.images[0].imageUrl : 'https://via.placeholder.com/150'}"
+                                                                class="card-img-top object-fit-cover" alt="Product">
+                                                        </div>
+                                                        <div class="card-body p-2 text-center">
+                                                            <h6 class="card-title text-dark text-truncate small mb-1"
+                                                                th:text="${fsp.product.name}">Product Name</h6>
+                                                            <div
+                                                                class="d-flex justify-content-center gap-1 align-items-baseline">
+                                                                <span class="text-danger fw-bold small"
+                                                                    th:text="${#numbers.formatDecimal(fsp.salePrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">100k</span>
+                                                                <span class="text-muted text-decoration-line-through"
+                                                                    style="font-size: 0.7rem;"
+                                                                    th:text="${#numbers.formatDecimal(fsp.product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">200k</span>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <!-- Empty State in Flash Sale Slider if list is empty -->
+                                            <div class="col-12 text-center text-white"
+                                                th:if="${bannerFlashSaleProducts == null || bannerFlashSaleProducts.isEmpty()}">
+                                                <p class="opacity-75">Hiện không có sản phẩm nào trong Flash Sale.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Floating Elements decoration -->
+                                <i class="fa fa-star position-absolute text-warning opacity-50"
+                                    style="top: 15%; left: 5%; font-size: 2rem; animation: float 3s ease-in-out infinite;"></i>
+                            </div>
+                            <div class="position-absolute top-0 start-0 w-100 h-100"
+                                style="background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,0.05) 20px);">
                             </div>
                         </div>
                     </div>
-                    <div class="carousel-item">
-                        <div class="d-flex align-items-center justify-content-center text-white text-center"
-                            style="height: 600px; background: linear-gradient(45deg, #C04848, #480048);">
-                            <div class="z-1 container">
-                                <h1 class="display-3 fw-bold mb-3 font-heading">ƯU ĐÃI ĐẶC BIỆT</h1>
-                                <p class="fs-4 mb-4 opacity-75 fw-light">Giảm giá lên đến 50% - Duy nhất hôm nay</p>
-                                <a href="/product"
-                                    class="btn btn-light px-5 py-3 fw-bold rounded-0 text-uppercase shadow-lg hover-lift">Săn
-                                    Sale</a>
-                            </div>
-                        </div>
-                    </div>
+
+                    <script>
+                        function copyToClipboard(btn) {
+                            const code = btn.getAttribute('data-code');
+                            navigator.clipboard.writeText(code).then(() => {
+                                const originalText = btn.innerHTML;
+                                btn.innerHTML = '<i class="fa fa-check me-2"></i>Đã sao chép';
+                                btn.classList.remove('btn-dark');
+                                btn.classList.add('btn-success');
+                                setTimeout(() => {
+                                    btn.innerHTML = originalText;
+                                    btn.classList.add('btn-dark');
+                                    btn.classList.remove('btn-success');
+                                }, 2000);
+                            });
+                        }
+                    </script>
+                    <style>
+                        .hover-scale:hover {
+                            transform: scale(1.05);
+                        }
+
+                        @keyframes float {
+                            0% {
+                                transform: translateY(0px);
+                            }
+
+                            50% {
+                                transform: translateY(-20px);
+                            }
+
+                            100% {
+                                transform: translateY(0px);
+                            }
+                        }
+
+                        .transform-hover {
+                            transition: transform 0.3s ease;
+                        }
+
+                        .transform-hover:hover {
+                            transform: translateY(-5px);
+                        }
+                    </style>
                 </div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#mainBannerCarousel"
-                    data-bs-slide="prev">
+                    data-bs-slide="prev" style="z-index: 10;">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
                 <button class="carousel-control-next" type="button" data-bs-target="#mainBannerCarousel"
-                    data-bs-slide="next">
+                    data-bs-slide="next" style="z-index: 10;">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
@@ -119,48 +302,130 @@
         </div>
 
         <!-- Flash Sale Section -->
+        <!-- Flash Sale Section -->
         <div class="container mb-5" th:if="${activeFlashSales != null && !activeFlashSales.isEmpty()}">
-            <div class="alert alert-light border border-secondary shadow-sm d-flex align-items-center justify-content-between flex-wrap rounded-0"
-                style="background-color: #fff8e1;">
-                <div class="d-flex align-items-center">
-                    <span class="bg-dark text-white p-2 rounded me-3"><i class="fa fa-bolt"></i></span>
-                    <div>
-                        <h4 class="mb-0 font-heading text-uppercase text-dark">Flash Sale</h4>
-                        <p class="mb-0 text-muted small" th:text="${activeFlashSales[0].name}">Golden Hour</p>
+            <div class="bg-white shadow-sm border p-4">
+                <!-- Header with Timer -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-3">
+                    <div class="d-flex align-items-center gap-4">
+                        <div class="d-flex align-items-center">
+                            <i class="fa fa-bolt fa-2x text-warning me-2" style="animation: flash 1s infinite;"></i>
+                            <h2 class="mb-0 fw-bold text-uppercase fst-italic"
+                                style="color: #ee4d2d; letter-spacing: -1px;">FLASH DEAL</h2>
+                        </div>
+
+                        <!-- Countdown Timer Blocks -->
+                        <div class="d-flex align-items-center gap-2 font-monospace fw-bold fs-5 text-white"
+                            id="flash-countdown-blocks">
+                            <div class="bg-dark rounded px-2 py-1" id="timer-hours">00</div>
+                            <span class="text-dark">:</span>
+                            <div class="bg-dark rounded px-2 py-1" id="timer-minutes">00</div>
+                            <span class="text-dark">:</span>
+                            <div class="bg-dark rounded px-2 py-1" id="timer-seconds">00</div>
+                        </div>
+                    </div>
+
+                    <a href="/flash-sale" class="text-muted text-decoration-none fw-bold small">XEM TẤT CẢ DEAL +</a>
+                </div>
+
+                <!-- Product List -->
+                <div class="row row-cols-2 row-cols-md-4 row-cols-lg-5 g-3">
+                    <div class="col" th:each="fsp : ${activeFlashSales[0].flashSaleProducts}">
+                        <!-- Use FlashSaleProduct (fsp) to access product and sale price -->
+                        <div class="card h-100 border hover-shadow transition-all position-relative overflow-hidden">
+
+                            <!-- Badges -->
+                            <div class="position-absolute top-0 start-0 m-2 z-1">
+                                <span class="badge bg-danger rounded-0">MUA 1 ĐƯỢC 2</span>
+                            </div>
+                            <!-- Discount Bubble -->
+                            <div class="position-absolute top-0 end-0 m-2 z-1 bg-warning rounded-circle d-flex flex-column align-items-center justify-content-center shadow-sm"
+                                style="width: 45px; height: 45px; line-height: 1;">
+                                <span class="text-danger fw-bold small"
+                                    th:text="${'-' + ((1 - fsp.salePrice.doubleValue() / fsp.product.price.doubleValue()) * 100).intValue() + '%'}">-50%</span>
+                            </div>
+
+                            <a th:href="@{/product/{slug}(slug=${fsp.product.slug})}" class="text-decoration-none">
+                                <div class="ratio ratio-1x1 bg-light">
+                                    <img th:src="${fsp.product.images != null && !fsp.product.images.isEmpty() ? fsp.product.images[0].imageUrl : 'https://via.placeholder.com/300'}"
+                                        class="card-img-top object-fit-cover" alt="Product Image">
+                                </div>
+                            </a>
+
+                            <div class="card-body p-2 d-flex flex-column">
+                                <a th:href="@{/product/{slug}(slug=${fsp.product.slug})}"
+                                    class="text-decoration-none text-dark mb-2">
+                                    <h6 class="card-title text-truncate small mb-1" th:text="${fsp.product.name}">
+                                        Product Name</h6>
+                                </a>
+
+                                <div class="mt-auto">
+                                    <div class="d-flex align-items-baseline gap-1 flex-wrap mb-2">
+                                        <span class="text-danger fw-bold fs-5"
+                                            th:text="${#numbers.formatDecimal(fsp.salePrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">100.000đ</span>
+                                        <span class="text-muted text-decoration-line-through small"
+                                            th:text="${#numbers.formatDecimal(fsp.product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">200.000đ</span>
+                                    </div>
+
+                                    <!-- Progress Bar -->
+                                    <div class="position-relative w-100 rounded-pill overflow-hidden"
+                                        style="height: 16px; background-color: #ffbda6;">
+                                        <!-- Fake progress for visual effect -->
+                                        <div class="h-100 rounded-pill bg-danger" style="width: 78%;"></div>
+                                        <span
+                                            class="position-absolute top-50 start-50 translate-middle text-white fw-bold"
+                                            style="font-size: 10px; text-shadow: 0 0 2px rgba(0,0,0,0.5);">ĐANG DIỄN RA
+                                            78%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="d-flex align-items-center mt-2 mt-md-0">
-                    <span class="me-2 text-uppercase small fw-bold">Kết thúc sau:</span>
-                    <div class="h4 mb-0 font-heading text-danger" id="flash-sale-timer">00:00:00</div>
-                    <script th:inline="javascript">
-                        (function () {
-                            const endTime = [[${ activeFlashSales[0].endTime.time }]];
-
-                            function updateTimer() {
-                                const now = new Date().getTime();
-                                const distance = endTime - now;
-
-                                if (distance < 0) {
-                                    document.getElementById("flash-sale-timer").innerHTML = "Đã kết thúc";
-                                    return;
-                                }
-
-                                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                                document.getElementById("flash-sale-timer").innerHTML =
-                                    (hours < 10 ? "0" + hours : hours) + ":" +
-                                    (minutes < 10 ? "0" + minutes : minutes) + ":" +
-                                    (seconds < 10 ? "0" + seconds : seconds);
-                            }
-
-                            setInterval(updateTimer, 1000);
-                            updateTimer();
-                        })();
-                    </script>
-                </div>
             </div>
+
+            <!-- Timer Script -->
+            <script th:inline="javascript">
+                (function () {
+                    const endTime = [[${ activeFlashSales[0].endTime.time }]];
+
+                    function updateTimer() {
+                        const now = new Date().getTime();
+                        const distance = endTime - now;
+
+                        if (distance < 0) {
+                            document.getElementById("flash-countdown-blocks").innerHTML = "<span class='text-danger fw-bold'>ĐÃ KẾT THÚC</span>";
+                            return;
+                        }
+
+                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                        document.getElementById("timer-hours").innerText = (hours < 10 ? "0" + hours : hours);
+                        document.getElementById("timer-minutes").innerText = (minutes < 10 ? "0" + minutes : minutes);
+                        document.getElementById("timer-seconds").innerText = (seconds < 10 ? "0" + seconds : seconds);
+                    }
+
+                    setInterval(updateTimer, 1000);
+                    updateTimer();
+                })();
+            </script>
+            <style>
+                @keyframes flash {
+
+                    0%,
+                    100% {
+                        opacity: 1;
+                        transform: scale(1);
+                    }
+
+                    50% {
+                        opacity: 0.5;
+                        transform: scale(1.1);
+                    }
+                }
+            </style>
         </div>
 
         <!-- Best Selling Section -->
