@@ -1,0 +1,90 @@
+
+PHÂN TÍCH CHI TIẾT LOGIC VÀ NGHIỆP VỤ HỆ THỐNG ORISHOP
+======================================================
+
+1. TỔNG QUAN KIẾN TRÚC
+--------------------
+Hệ thống được xây dựng theo mô hình MVC (Model-View-Controller) trên nền tảng Spring Boot.
+- **View Layer**: Sử dụng Thymeleaf để render giao diện Server-side.
+- **Controller Layer**: Xử lý các HTTP Request, điều hướng luồng dữ liệu.
+- **Service Layer**: Chứa toàn bộ logic nghiệp vụ (Business Logic).
+- **Repository Layer**: Tương tác với Database (MySQL) thông qua JPA/Hibernate.
+
+2. PHÂN TÍCH LOGIC NGHIỆP VỤ CỐT LÕI (CORE BUSINESS LOGIC)
+--------------------------------------------------------
+
+2.1. Logic Quản Lý Giỏ Hàng (Cart Management)
+- **Cơ chế lưu trữ**: 
+  - Sử dụng `HttpSession` để lưu trạng thái giỏ hàng (Session-based Cart).
+  - Giỏ hàng không được lưu trực tiếp xuống Database cho đến khi đặt hàng thành công.
+  - Lợi ích: Tốc độ truy xuất nhanh, hỗ trợ khách vãng lai (Guest) mua hàng mà không cần đăng nhập ngay.
+- **Logic Tính Giá (Pricing Engine)**:
+  - Hệ thống tích hợp cơ chế ưu tiên giá tự động:
+    1. Kiểm tra sản phẩm có trong chương trình **Flash Sale** đang diễn ra không? (Ưu tiên cao nhất).
+    2. Nếu không, kiểm tra giá **Khuyến mãi (Discount Price)** của sản phẩm.
+    3. Nếu không, sử dụng **Giá gốc (Regular Price)**.
+- **Mã giảm giá (Coupon)**:
+  - Hỗ trợ 2 loại: Giảm theo phần trăm (%) và Giảm theo số tiền cố định (Amount).
+  - Logic kiểm tra điều kiện áp dụng (Hạn sử dụng, Số lượng mã, Giá trị đơn hàng tối thiểu).
+
+2.2. Quy Trình Đặt Hàng & Thanh Toán (Order & Payment Flow)
+Đây là nghiệp vụ phức tạp nhất của hệ thống, xử lý đa luồng dữ liệu.
+
+* **Bước 1: Khởi tạo đơn hàng (Checkout Init)**
+  - Hệ thống yêu cầu đăng nhập (Spring Security bắt buộc).
+  - Load danh sách địa chỉ từ **Sổ địa chỉ (Address Book)** của User.
+  - Tính toán lại tổng tiền lần cuối (Re-calculate) để đảm bảo không sai lệch so với giá hiện tại.
+
+* **Bước 2: Xử lý Thanh Toán (Payment Processing)**
+  Hệ thống chia nhánh xử lý dựa trên phương thức thanh toán:
+  
+  a. **Thanh toán khi nhận hàng (COD)**:
+     - Tạo đơn hàng trạng thái `PENDING` (Chờ xử lý).
+     - Giảm tồn kho sản phẩm (Inventory Deduction).
+     - Xóa giỏ hàng trong Session.
+     - Chuyển hướng trang "Đặt hàng thành công".
+  
+  b. **Thanh toán Online (VNPay / MoMo)**:
+     - Tạo đơn hàng trạng thái `PENDING` (Chưa thanh toán).
+     - **Tạo URL thanh toán**:
+       - Gọi Service Payment (VnPayService/MoMoService).
+       - Gom dữ liệu đơn hàng + Cấu hình (Merchant info) + Checksum (Hash Secret).
+       - Chuyển hướng người dùng qua cổng thanh toán Ngân hàng/Ví.
+     - **Xử lý kết quả trả về (Payment Callback/IPN)**:
+       - Hệ thống lắng nghe Controller trả về từ cổng thanh toán.
+       - **Verify Signature (Quan trọng)**: Kiểm tra chữ ký số (Checksum) để đảm bảo dữ liệu không bị giả mạo.
+       - Nếu Thành công (Response Code = 00): Cập nhật trạng thái đơn -> `PAID/CONFIRMED`, Giảm tồn kho, Xóa giỏ.
+       - Nếu Thất bại: Giữ trạng thái đơn `CANCELLED` hoặc `PENDING`, thông báo lỗi.
+
+2.3. Logic Flash Sale (Săn Sale)
+- **Time-based Logic**: Sản phẩm chỉ có giá Flash Sale trong khung giờ [Start Time, End Time].
+- **Quantity Control**: Mỗi sản phẩm trong Flash Sale có số lượng giới hạn riêng (Stock Sale).
+- Khi người dùng thêm vào giỏ, hệ thống phải lock hoặc kiểm tra số lượng khả dụng của Flash Sale thay vì tồn kho tổng.
+
+2.4. Quản lý Người dùng & Bảo mật
+- **Authentication**: Sử dụng Spring Security + BCrypt Password Encoder.
+- **Authorization**: Phân quyền dựa trên Role (ADMIN/USER).
+  - ADMIN: Truy cập `/admin/**` (Thống kê, Quản lý sản phẩm/đơn hàng/User).
+  - USER: Truy cập `/profile/**`, `/checkout/**`.
+- **Address Book**: Một User có nhiều Address, nhưng chỉ 1 Default Address. Logic tự động reset flag Default cũ khi set Default mới.
+
+2.5. Cơ chế đề xuất & Theo dõi (Tracking)
+- **Recently Viewed**: Mỗi khi User xem chi tiết sản phẩm, hệ thống lưu ID sản phẩm vào Cookie hoặc DB. Khi hiển thị lại, loại bỏ trùng lặp và lấy danh sách mới nhất.
+- **Product Reviews**: Chỉ cho phép đánh giá khi User đã mua sản phẩm đó (Logic kiểm tra lịch sử đơn hàng `OrderHistory`).
+
+3. CẤU TRÚC DỮ LIỆU & QUAN HỆ (ENTITY RELATIONSHIPS)
+----------------------------------------------------
+- **User** 1 - n **Order**: Một người có nhiều đơn hàng.
+- **Order** 1 - n **OrderItem**: Một đơn hàng có nhiều sản phẩm.
+- **Product** n - n **Category**: (Tùy cấu hình, thường là 1-n hoặc n-n).
+- **Product** 1 - n **ProductImage**: Một sản phẩm có nhiều ảnh (Ảnh chính + Gallery).
+- **FlashSale** 1 - n **FlashSaleProduct**: Một đợt Sale chứa nhiều sản phẩm với giá riêng.
+
+4. CÔNG NGHỆ BỔ TRỢ QUAN TRỌNG
+------------------------------
+- **Cloudinary Service**: Upload ảnh lên Cloud thay vì lưu local server -> Giảm tải Server, tăng tốc độ tải trang (CDN).
+- **Global Controller Advice**: Tự động inject thông tin chung (User Info, Cart Count, Categories) vào tất cả các trang mà không cần gọi lặp lại ở từng Controller.
+
+TỔNG KẾT
+--------
+Logic hệ thống Orishop được thiết kế chặt chẽ, đặc biệt chú trọng vào tính chính xác của dữ liệu tài chính (Đơn hàng/Thanh toán) và trải nghiệm người dùng (Giỏ hàng/Flash Sale). Kiến trúc phân tầng giúp code dễ bảo trì và mở rộng.

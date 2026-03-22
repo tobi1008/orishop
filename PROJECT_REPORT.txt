@@ -1,0 +1,113 @@
+BÁO CÁO ĐỒ ÁN KẾT THÚC MÔN LẬP TRÌNH WEB
+ĐỀ TÀI: XÂY DỰNG WEBSITE THƯƠNG MẠI ĐIỆN TỬ ORISHOP
+
+MỤC LỤC
+1. GIỚI THIỆU TỔNG QUAN
+2. CÔNG NGHỆ SỬ DỤNG
+3. PHÂN TÍCH CHỨC NĂNG HỆ THỐNG
+   3.1. Phân quyền người dùng
+   3.2. Chức năng chi tiết - Client (Khách hàng)
+   3.3. Chức năng chi tiết - Admin (Quản trị viên)
+4. ĐIỂM NỔI BẬT VỀ KỸ THUẬT
+5. KẾT LUẬN
+
+---
+
+1. GIỚI THIỆU TỔNG QUAN
+-----------------------
+Orishop là một nền tảng thương mại điện tử hoàn chỉnh, cung cấp giải pháp mua sắm trực tuyến từ A-Z. Dự án tập trung vào trải nghiệm người dùng mượt mà (User Experience) và quy trình quản trị chuyên sâu.
+
+2. CÔNG NGHỆ SỬ DỤNG
+--------------------
+*   **Backend**: Java Spring Boot (Core framework).
+*   **Frontend**: Thymeleaf, HTML5, CSS3, JavaScript.
+*   **Database**: MySQL.
+*   **Thư viện/Dịch vụ 3rd-party**:
+    *   **Spring Security**: Bảo mật & Phân quyền.
+    *   **Cloudinary**: Lưu trữ ảnh đám mây.
+    *   **Lombok**: Tối ưu boilerplate code.
+    *   **Thanh toán**: API VNPay & MoMo.
+
+3. PHÂN TÍCH CHỨC NĂNG HỆ THỐNG
+-------------------------------
+
+3.1. PHÂN QUYỀN (Roles)
+*   **ADMIN**: Quản trị toàn hệ thống. Tự động cấp quyền cho người dùng đầu tiên.
+*   **USER**: Mua hàng, quản lý cá nhân.
+
+3.2. CHỨC NĂNG CHI TIẾT - CLIENT (KHÁCH HÀNG)
+
+A. Tài khoản & Cá nhân hóa
+*   **Đăng ký / Đăng nhập**: Bảo mật mật khẩu (BCrypt).
+*   **Hồ sơ cá nhân (Profile)**: Xem thông tin tài khoản.
+*   **Sổ địa chỉ (Address Book)**:
+    *   Thêm nhiều địa chỉ nhận hàng.
+    *   Xóa địa chỉ, thiết lập địa chỉ mặc định để tự động điền khi thanh toán.
+*   **Sản phẩm đã xem (Recently Viewed)**: Tự động lưu và hiển thị lại danh sách các sản phẩm người dùng vừa khám phá.
+
+B. Mua sắm & Tương tác
+*   **Trang chủ (Homepage)**: Banner, Flash Sale (đếm ngược), Sản phẩm mới.
+*   **Tìm kiếm & Duyệt danh mục**: Tìm theo tên, lọc theo category (URL chuẩn SEO).
+*   **Liên hệ (Contact)**: Gửi phản hồi/liên hệ tới ban quản trị.
+*   **Chi tiết sản phẩm**:
+    *   Thông tin giá (Gốc/Sale), tồn kho, mô tả.
+    *   Đánh giá (Review): Xem và viết bình luận, chấm sao.
+
+C. Giỏ hàng & Thanh toán (Core Business)
+*   **Giỏ hàng**: Thêm/Sửa/Xóa sản phẩm, dọn sạch giỏ. Tự động tính tổng tiền.
+*   **Mã giảm giá (Coupon)**: Áp dụng/Hủy voucher ngay tại giỏ hàng.
+*   **Thanh toán (Checkout)**:
+    *   Hỗ trợ 3 phương thức: COD, VNPay (ATM/QR), MoMo (Ví điện tử).
+    *   Xử lý thanh toán tự động cập nhật trạng thái đơn (IPN).
+
+D. Quản lý Đơn hàng (My Orders)
+*   **Lịch sử đơn hàng**: Danh sách toàn bộ đơn hàng.
+*   **Chi tiết & Theo dõi trạng thái**: Tracking từng bước (Chờ duyệt, Đang giao...).
+*   **Hủy đơn hàng**: Cho phép hủy đơn khi còn ở trạng thái "Chờ duyệt" (Pending).
+*   **Xác nhận nhận hàng**: Hoàn tất chu trình mua sắm.
+*   **Yêu cầu hoàn trả**: Xử lý các trường hợp lỗi sản phẩm.
+
+3.3. CHỨC NĂNG CHI TIẾT - ADMIN (QUẢN TRỊ VIÊN)
+
+A. Quản lý Sản phẩm (Products)
+*   CRUD đầy đủ (Thêm/Sửa/Xóa).
+*   **Upload ảnh đa phương tiện (Cloudinary)**.
+*   **Flash Sale Manager**: Cài đặt sản phẩm giảm giá theo khung giờ & số lượng.
+*   Quản lý tồn kho.
+
+B. Quản lý Đơn hàng (Orders)
+*   Xem danh sách, lọc theo trạng thái.
+*   Duyệt đơn, xác nhận giao hàng.
+*   Xử lý khiếu nại (Hoàn trả).
+*   Cập nhật trạng thái thanh toán thủ công.
+
+C. Quản lý Danh mục (Categories)
+*   Tạo/Sửa/Xóa nhóm hàng.
+*   Tự động tạo Slug.
+
+D. Quản lý Marketing
+*   **Coupons**: Tạo mã khuyến mãi (Giảm %, Giảm tiền, Hạn dùng, Số lượng...).
+*   **Reviews**: Kiểm duyệt đánh giá sản phẩm.
+
+E. Cấu hình & Hệ thống (Settings)
+*   Cập nhật thông tin Website (Tên, Hotline, Email...).
+*   **Đổi Logo WEBSITE**: Upload logo mới ngay trên Admin.
+*   Link mạng xã hội (Social Media).
+
+F. Quản lý Users
+*   Xem danh sách thành viên, xóa tài khoản vi phạm.
+
+4. ĐIỂM NỔI BẬT VỀ KỸ THUẬT
+---------------------------
+*   **Integration (Tích hợp)**: Hệ thống thanh toán thực tế (MoMo, VNPay) & Lưu trữ ảnh Cloud (Cloudinary) giúp sản phẩm mang tính thực tế cao, không chỉ là demo.
+*   **Automation (Tự động)**:
+    *   Tự động lưu lịch sử xem hàng.
+    *   Tự động xử lý trạng thái đơn hàng khi thanh toán online thành công.
+*   **UX (Trải nghiệm)**:
+    *   "Address Book" giúp người dùng mua hàng nhanh chóng.
+    *   "Flash Sale" tạo hiệu ứng mua sắm hấp dẫn.
+*   **Clean Architecture**: Sử dụng `GlobalControllerAdvice` để tối ưu dữ liệu dùng chung, cấu trúc Code phân tách rõ ràng (Controller - Service - Repository).
+
+5. KẾT LUẬN
+-----------
+Đồ án Orishop là một sản phẩm hoàn chỉnh, đáp ứng đầy đủ các tiêu chuẩn của một website TMĐT hiện đại, sẵn sàng cho việc triển khai thực tế.
