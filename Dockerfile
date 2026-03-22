@@ -12,6 +12,6 @@ WORKDIR /app
 # Copy file .jar từ bước builder sang
 COPY --from=builder /app/target/*.jar app.jar
 # Mở port mặc định của Spring Boot
-EXPOSE 8080
+EXPOSE 8091
 # Lệnh khởi động app
 ENTRYPOINT ["java", "-jar", "app.jar"]
