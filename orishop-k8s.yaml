@@ -1,4 +1,4 @@
-# 1. Deployment (Cách K8s chạy App)
+# 1. Deployment (Cách K8s chạy App và bơm cấu hình Database ẩn)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,9 +19,25 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8091
+        env:
+        - name: DB_URL
+          valueFrom:
+            secretKeyRef:
+              name: orishop-db-secret
+              key: DB_URL
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: orishop-db-secret
+              key: DB_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: orishop-db-secret
+              key: DB_PASS
 
 ---
-# 2. Service (Cổng giao tiếp nội bộ)
+# 2. Service (Cổng giao tiếp nội bộ K8s)
 apiVersion: v1
 kind: Service
 metadata:
@@ -35,7 +51,7 @@ spec:
       targetPort: 8091
 
 ---
-# 3. Ingress (Bảo vệ và điều hướng tên miền public)
+# 3. Ingress (Điều hướng tên miền public vào app)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
