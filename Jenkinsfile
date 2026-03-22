@@ -36,19 +36,16 @@ pipeline {
             }
         }
         
-        // --- ĐÂY LÀ PHẦN MỚI THÊM VÀO ---
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Đang ra lệnh cho cụm K8s triển khai ứng dụng...'
-                // Gọi file Secret có ID là k8s-kubeconfig mà bạn vừa nạp
                 withCredentials([file(credentialsId: 'k8s-kubeconfig', variable: 'KUBECONFIG')]) {
                     sh '''
-                    # Trỏ đường dẫn KUBECONFIG và chạy lệnh apply
                     export KUBECONFIG=$KUBECONFIG
                     
-                    # Ép K8s cập nhật image mới nhất
-                    kubectl apply -f orishop-k8s.yaml
-                    kubectl rollout restart deployment/orishop-deployment
+                    # Ép K8s cập nhật image mới nhất và bỏ qua check chứng chỉ IP
+                    kubectl apply -f orishop-k8s.yaml --insecure-skip-tls-verify=true
+                    kubectl rollout restart deployment/orishop-deployment --insecure-skip-tls-verify=true
                     '''
                 }
             }
