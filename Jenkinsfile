@@ -2,11 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Tên tài khoản Docker Hub của bạn
         DOCKER_HUB_USER = "tobi1008" 
-        // Tên image sẽ được tạo ra
         IMAGE_NAME = "${DOCKER_HUB_USER}/orishop" 
-        // Tag version (dùng số build của Jenkins cho dễ quản lý)
         IMAGE_TAG = "v${env.BUILD_NUMBER}" 
     }
 
@@ -14,16 +11,14 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 echo 'Đang tải mã nguồn từ GitHub...'
-                // Điền đúng link repo GitHub của bạn vào đây
                 git branch: 'main', url: 'https://github.com/tobi1008/orishop.git' 
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo 'Đang đóng gói ứng dụng Spring Boot thành Docker Image...'
+                echo 'Đang đóng gói ứng dụng...'
                 script {
-                    // Lệnh build sử dụng Dockerfile bạn vừa tạo
                     dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
                 }
             }
@@ -31,14 +26,30 @@ pipeline {
 
         stage('Push to Docker Hub') {
             steps {
-                echo 'Đang đẩy Image lên Docker Hub...'
+                echo 'Đang đẩy Image lên kho chứa...'
                 script {
-                    // Sử dụng ID Credentials bạn vừa tạo ở Bước 1
                     docker.withRegistry('', 'docker-hub-credentials') {
                         dockerImage.push()
-                        // Push thêm một tag 'latest' để dễ gọi
                         dockerImage.push('latest') 
                     }
+                }
+            }
+        }
+        
+        // --- ĐÂY LÀ PHẦN MỚI THÊM VÀO ---
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo 'Đang ra lệnh cho cụm K8s triển khai ứng dụng...'
+                // Gọi file Secret có ID là k8s-kubeconfig mà bạn vừa nạp
+                withCredentials([file(credentialsId: 'k8s-kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                    # Trỏ đường dẫn KUBECONFIG và chạy lệnh apply
+                    export KUBECONFIG=$KUBECONFIG
+                    
+                    # Ép K8s cập nhật image mới nhất
+                    kubectl apply -f orishop-k8s.yaml
+                    kubectl rollout restart deployment/orishop-deployment
+                    '''
                 }
             }
         }

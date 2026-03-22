@@ -1,10 +1,10 @@
-# 1. Khai báo Deployment
+# 1. Deployment (Cách K8s chạy App)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: orishop-deployment
 spec:
-  replicas: 2 
+  replicas: 2
   selector:
     matchLabels:
       app: orishop
@@ -16,11 +16,12 @@ spec:
       containers:
       - name: orishop-app
         image: tobi1008/orishop:latest
+        imagePullPolicy: Always
         ports:
-        - containerPort: 8091 # <--- Đổi thành 8091 (Cổng app đang chạy)
+        - containerPort: 8091
 
 ---
-# 2. Khai báo Service (Cửa ngõ mạng)
+# 2. Service (Cổng giao tiếp nội bộ)
 apiVersion: v1
 kind: Service
 metadata:
@@ -30,5 +31,26 @@ spec:
     app: orishop
   ports:
     - protocol: TCP
-      port: 80          # Cổng mà các app khác trong cụm K8s gọi vào
-      targetPort: 8091  # <--- Trỏ chính xác đích đến là 8091 của Container
+      port: 80
+      targetPort: 8091
+
+---
+# 3. Ingress (Bảo vệ và điều hướng tên miền public)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: orishop-ingress
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+  - host: orishop.quyenlt.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: orishop-service
+            port:
+              number: 80
