@@ -46,18 +46,21 @@ pipeline {
             steps {
                 container('docker-cli') {
                     script {
-                        echo "--- Đang đợi Docker Daemon nổ máy ---"
-                        timeout(time: 2, unit: 'MINUTES') {
-                            until {
-                                try {
-                                    sh "docker version"
-                                    return true
-                                } catch (Exception e) {
-                                    sleep 5
-                                    return false
-                                }
+                        echo "--- Đang đợi Docker Daemon nổ máy (waitUntil) ---"
+                        
+                        // Jenkins sẽ lặp lại đoạn này cho đến khi return true
+                        waitUntil {
+                            def status = sh(script: "docker version", returnStatus: true)
+                            if (status == 0) {
+                                return true
+                            } else {
+                                echo "Docker chưa sẵn sàng, đang thử lại sau 5s..."
+                                sleep 5
+                                return false
                             }
                         }
+
+                        echo "--- Docker đã sẵn sàng! Bắt đầu Build Image ---"
                         sh "docker build -t ${IMAGE_NAME} ."
                         sh "echo ${DOCKER_CREDS_PSW} | docker login -u ${DOCKER_CREDS_USR} --password-stdin"
                         sh "docker push ${IMAGE_NAME}"
