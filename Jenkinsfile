@@ -72,10 +72,20 @@ pipeline {
         stage('3. Triển khai lên AWS EKS') {
             steps {
                 container('k8s-tools') {
-                    withEnv(["AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}", "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}"]) {
-                        sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}"
-                        sh "kubectl apply -f orishop-eks.yaml"
-                        sh "kubectl get pods"
+                    script {
+                        echo "--- Đang kết nối tới cụm EKS: ${EKS_CLUSTER_NAME} ---"
+                        withEnv(["AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}", "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}"]) {
+                            
+                            sh "aws eks update-kubeconfig --region ${AWS_REGION} --name ${EKS_CLUSTER_NAME}"
+                            
+                            echo "--- Đang nạp file cấu hình vào EKS (Phòng default) ---"
+                            sh "kubectl apply -f orishop-eks.yaml -n default"
+                            
+                            echo "--- Kiểm tra trạng thái các Pod ---"
+                            sh "kubectl get pods -n default"
+                            
+                            echo "--- Triển khai lên AWS EKS thành công rực rỡ! ---"
+                        }
                     }
                 }
             }
