@@ -1,52 +1,77 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            yaml '''
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              # 1. Container dùng để nhào nặn Docker Image (Docker-in-Docker)
+              - name: docker
+                image: docker:24.0.5-dind
+                securityContext:
+                  privileged: true
+                env:
+                - name: DOCKER_TLS_CERTDIR
+                  value: ""
+              
+              # 2. Container chứa vũ khí AWS CLI và kubectl để tấn công EKS
+              - name: k8s-tools
+                image: alpine/k8s:1.28.2
+                command:
+                - cat
+                tty: true
+            '''
+        }
+    }
 
     environment {
-        DOCKER_HUB_USER = "tobi1008" 
-        IMAGE_NAME = "${DOCKER_HUB_USER}/orishop" 
-        IMAGE_TAG = "v${env.BUILD_NUMBER}" 
+        // Lấy chìa khóa từ két sắt Jenkins
+        DOCKER_CREDS = credentials('docker-hub-credentials')
+        AWS_CREDS = credentials('aws-credentials')
+        
+        // Gắn Access Key vào biến môi trường chuẩn của AWS
+        AWS_ACCESS_KEY_ID = "${AWS_CREDS_USR}"
+        AWS_SECRET_ACCESS_KEY = "${AWS_CREDS_PSW}"
+        AWS_DEFAULT_REGION = "ap-southeast-1"
+        
+        // Tên cụm EKS (Lát nữa Terraform tạo ra tên gì thì bạn sửa lại cho khớp nhé)
+        EKS_CLUSTER_NAME = "quyenlt-eks-cluster" 
+        IMAGE_NAME = "tobi1008/orishop:latest"
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('1. Kéo Code từ GitHub') {
             steps {
-                echo 'Đang tải mã nguồn từ GitHub...'
-                git branch: 'main', url: 'https://github.com/tobi1008/orishop.git' 
+                checkout scm
+                echo "Đã lấy mã nguồn com.quyenlt mới nhất về máy!"
             }
         }
 
-        stage('Build Docker Image') {
+        stage('2. Đóng gói & Đẩy Image (Docker Hub)') {
             steps {
-                echo 'Đang đóng gói ứng dụng...'
-                script {
-                    dockerImage = docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
+                container('docker') {
+                    // VPS của bạn thường là chip Intel/AMD, nên sẽ tự ra build chuẩn linux/amd64 cho EKS
+                    sh "docker build -t ${IMAGE_NAME} ."
+                    sh "echo ${DOCKER_CREDS_PSW} | docker login -u ${DOCKER_CREDS_USR} --password-stdin"
+                    sh "docker push ${IMAGE_NAME}"
+                    echo "Đã đẩy Image lên kho an toàn!"
                 }
             }
         }
 
-        stage('Push to Docker Hub') {
+        stage('3. Triển khai lên AWS EKS') {
             steps {
-                echo 'Đang đẩy Image lên kho chứa...'
-                script {
-                    docker.withRegistry('', 'docker-hub-credentials') {
-                        dockerImage.push()
-                        dockerImage.push('latest') 
-                    }
-                }
-            }
-        }
-        
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo 'Đang ra lệnh cho cụm K8s triển khai ứng dụng...'
-                withCredentials([file(credentialsId: 'k8s-kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    export KUBECONFIG=$KUBECONFIG
+                container('k8s-tools') {
+                    // Đưa hộ chiếu AWS cho EKS xem để lấy quyền điều khiển (Kubeconfig)
+                    sh "aws eks update-kubeconfig --region ${AWS_DEFAULT_REGION} --name ${EKS_CLUSTER_NAME}"
                     
-                    # Ép K8s cập nhật image mới nhất và bỏ qua check chứng chỉ IP
-                    kubectl apply -f orishop-k8s.yaml --insecure-skip-tls-verify=true
-                    kubectl rollout restart deployment/orishop-deployment --insecure-skip-tls-verify=true
-                    '''
+                    // Ném file cấu hình K8s vào cụm EKS để chạy App
+                    sh "kubectl apply -f orishop-eks.yaml"
+                    
+                    // Ép EKS phải kéo Image mới nhất về (Restart Pods)
+                    sh "kubectl rollout restart deployment orishop-app"
+                    echo "Triển khai lên AWS EKS thành công rực rỡ!"
                 }
             }
         }
