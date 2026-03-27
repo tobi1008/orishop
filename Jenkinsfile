@@ -80,6 +80,7 @@ pipeline {
                             
                             echo "--- Đang nạp file cấu hình vào EKS (Phòng default) ---"
                             sh "kubectl apply -f orishop-eks.yaml -n default"
+                            sh "kubectl rollout restart deployment/orishop-app -n default"
                             
                             echo "--- Kiểm tra trạng thái các Pod ---"
                             sh "kubectl get pods -n default"
