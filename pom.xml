@@ -102,6 +102,11 @@
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>1.12.500</version>
 		</dependency>
+		<!-- 5.5 Hibernate/Spring Session cho k8s -->
+		<dependency>
+			<groupId>org.springframework.session</groupId>
+			<artifactId>spring-session-jdbc</artifactId>
+		</dependency>
 		<!-- 6. Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
