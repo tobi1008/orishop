@@ -16,10 +16,10 @@ import java.util.UUID;
 public class S3UploadService {
 
     // Lấy tên Bucket và Region từ biến môi trường (đã khai báo trong file orishop-eks.yaml)
-    @Value("${AWS_S3_BUCKET_NAME}")
+    @Value("${AWS_S3_BUCKET_NAME:orishop-bucket}")
     private String bucketName;
 
-    @Value("${AWS_REGION}")
+    @Value("${AWS_REGION:ap-southeast-1}")
     private String region;
 
     private AmazonS3 s3Client;
