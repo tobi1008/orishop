@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.orishop.service.impl.CloudinaryService;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.orishop.service.S3UploadService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
@@ -22,7 +21,7 @@ import java.util.Map;
 public class AdminSettingController {
 
     private final SettingService settingService;
-    private final CloudinaryService cloudinaryService;
+    private final S3UploadService s3UploadService;
 
     @GetMapping
     public String showSettings(Model model) {
@@ -38,7 +37,7 @@ public class AdminSettingController {
 
         // Handle logo file upload
         if (logoFile != null && !logoFile.isEmpty()) {
-            String logoUrl = cloudinaryService.uploadFile(logoFile);
+            String logoUrl = s3UploadService.uploadFile(logoFile);
             if (logoUrl != null) {
                 allParams.put("site_logo", logoUrl);
             }

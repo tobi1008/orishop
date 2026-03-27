@@ -9,7 +9,7 @@ import com.orishop.repository.CategoryRepository;
 import com.orishop.repository.OrderRepository;
 import com.orishop.repository.ProductImageRepository;
 import com.orishop.repository.UserRepository;
-import com.orishop.service.impl.CloudinaryService;
+import com.orishop.service.S3UploadService;
 import com.orishop.service.impl.ProductService;
 import com.orishop.service.impl.ProductService;
 import com.orishop.service.ReviewService;
@@ -38,7 +38,7 @@ public class AdminController {
     private final UserRepository userRepository;
 
     // Service upload ảnh & Repository lưu ảnh
-    private final CloudinaryService cloudinaryService;
+    private final S3UploadService s3UploadService;
     private final ProductImageRepository productImageRepository;
     private final ReviewService reviewService;
     private final OrderService orderService; // Injected OrderService
@@ -139,7 +139,7 @@ public class AdminController {
         if (files != null && files.length > 0) {
             for (MultipartFile file : files) {
                 if (!file.isEmpty()) {
-                    String imageUrl = cloudinaryService.uploadFile(file);
+                    String imageUrl = s3UploadService.uploadFile(file);
                     if (imageUrl != null) {
                         ProductImage image = new ProductImage();
                         image.setProduct(savedProduct);

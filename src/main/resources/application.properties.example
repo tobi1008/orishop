@@ -27,10 +27,9 @@ spring.mail.password=your-app-password
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-# CLOUDINARY CONFIG 
-cloudinary.cloud-name=
-cloudinary.api-key=
-cloudinary.api-secret=
+# S3 CONFIG (Biến môi trường)
+AWS_S3_BUCKET_NAME=your-bucket-name
+AWS_REGION=ap-southeast-1
 
 # APP CUSTOM
 app.jwtSecret=
