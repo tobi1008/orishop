@@ -35,6 +35,10 @@ AWS_REGION=ap-southeast-1
 app.jwtSecret=
 app.jwtExpirationMs=
 
+# MULTIPART UPLOAD
+spring.servlet.multipart.max-file-size=10MB
+spring.servlet.multipart.max-request-size=10MB
+
 # VNPay Config
 vnpay.tmn-code=
 vnpay.hash-secret=
