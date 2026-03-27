@@ -50,6 +50,11 @@ public class S3UploadService {
         } catch (IOException e) {
             e.printStackTrace();
             return null;
+        } catch (Exception e) {
+            // Catch AmazonServiceException, SdkClientException, or any generic exception to prevent 500 errors
+            System.err.println("Lỗi từ AWS S3: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 }
