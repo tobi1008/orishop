@@ -40,7 +40,7 @@ spec:
         
         # --- KẾT NỐI KHO ẢNH (AWS S3) ---
         - name: AWS_S3_BUCKET_NAME
-          value: "com-quyenlt-media-dgecje"
+          value: "com-quyenlt-media-xsd18c"
         - name: AWS_REGION
           value: "ap-southeast-1"
 
