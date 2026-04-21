@@ -43,7 +43,7 @@ spec:
           value: "com-quyenlt-media-op340i"
         - name: AWS_REGION
           value: "ap-southeast-1"
-kubectl get pods -n default                                                 
+# kubectl get pods -n default                                                 
 ---
 # 3. MỞ CỬA CHO KHÁCH HÀNG TRUY CẬP (LOAD BALANCER SERVICE)
 apiVersion: v1

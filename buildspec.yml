@@ -11,7 +11,6 @@ phases:
       - echo "Đăng nhập vào Amazon ECR..."
       - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 808999395759.dkr.ecr.ap-southeast-1.amazonaws.com
       - REPOSITORY_URI=808999395759.dkr.ecr.ap-southeast-1.amazonaws.com/orishop-repo
-      # Lấy 7 chữ số đầu tiên của mã Git Commit làm Tag cho Image
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
   build:
     commands:
@@ -28,10 +27,8 @@ phases:
       - echo "Cập nhật ứng dụng lên cụm EKS..."
       - aws eks update-kubeconfig --name quyenlt-eks-cluster --region ap-southeast-1
       
-      # 1. Đổ móng: Tạo Deployment/Service nếu chưa có (chống lỗi NotFound)
-      # Lưu ý: Thay "deployment.yaml" bằng đường dẫn đúng tới file cấu hình K8s của boss
-      # Ví dụ: Nếu để trong thư mục k8s thì sửa thành: kubectl apply -f k8s/
-      - kubectl apply -f deployment.yaml 
+      # 1. Đổ móng: Gọi đúng tên file orishop-eks.yaml của boss
+      - kubectl apply -f orishop-eks.yaml 
       
-      # 2. Thay áo: Cập nhật image mới nhất cho con app
-      - kubectl set image deployment/orishop-app orishop-container=$REPOSITORY_URI:$IMAGE_TAG
+      # 2. Thay áo: Gọi đúng tên container 'orishop'
+      - kubectl set image deployment/orishop-app orishop=$REPOSITORY_URI:$IMAGE_TAG
