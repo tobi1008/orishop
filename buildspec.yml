@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Cài đặt kubectl bản mới nhất..."
+      - curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+      - chmod +x kubectl && mv kubectl /usr/local/bin/
+  pre_build:
+    commands:
+      - echo "Đăng nhập vào Amazon ECR..."
+      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 808999395759.dkr.ecr.ap-southeast-1.amazonaws.com
+      - REPOSITORY_URI=808999395759.dkr.ecr.ap-southeast-1.amazonaws.com/orishop-repo
+      # Lấy 7 chữ số đầu tiên của mã Git Commit làm Tag cho Image
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+  build:
+    commands:
+      - echo "Đóng gói file JAR bằng Maven..."
+      - mvn clean package -DskipTests
+      - echo "Tiến hành Build Docker Image..."
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Đẩy Docker Image lên kho ECR..."
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo "Cập nhật ứng dụng lên cụm EKS..."
+      # Đã cập nhật đúng tên cluster theo file Terraform của boss
+      - aws eks update-kubeconfig --name quyenlt-eks-cluster --region ap-southeast-1
+      - kubectl set image deployment/orishop-app orishop-container=$REPOSITORY_URI:$IMAGE_TAG
