@@ -40,10 +40,10 @@ spec:
         
         # --- KẾT NỐI KHO ẢNH (AWS S3) ---
         - name: AWS_S3_BUCKET_NAME
-          value: "com-quyenlt-media-xsd18c"
+          value: "com-quyenlt-media-op340i"
         - name: AWS_REGION
           value: "ap-southeast-1"
-
+kubectl get pods -n default                                                 
 ---
 # 3. MỞ CỬA CHO KHÁCH HÀNG TRUY CẬP (LOAD BALANCER SERVICE)
 apiVersion: v1
