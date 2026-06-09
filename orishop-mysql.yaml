@@ -1,0 +1,60 @@
+# 1. Tạo ổ cứng ảo (PVC) dung lượng 5GB
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orishop-mysql-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# 2. Triển khai Container MySQL (Deployment)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orishop-mysqldb
+spec:
+  selector:
+    matchLabels:
+      app: orishop-mysqldb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: orishop-mysqldb
+    spec:
+      containers:
+      - name: orishop-mysqldb
+        image: mysql:8.0.28
+        args:
+          - "--default-authentication-plugin=mysql_native_password"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "03051008" # Mật khẩu root mặc định của bạn
+        - name: MYSQL_DATABASE
+          value: "orishop" # Tên Database
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-storage
+        persistentVolumeClaim:
+          claimName: orishop-mysql-pvc
+
+---
+# 3. Mở cổng mạng nội bộ (Service)
+apiVersion: v1
+kind: Service
+metadata:
+  name: orishop-mysqldb # Tên dịch vụ nội bộ để Webapp gọi sang
+spec:
+  selector:
+    app: orishop-mysqldb
+  ports:
+    - port: 3306
