@@ -1,4 +1,17 @@
-# 1. Deployment (Cách K8s chạy App và bơm cấu hình Database ẩn)
+# 1. Thẻ nhớ lưu trữ ảnh (PersistentVolumeClaim - K3s sử dụng Local Path làm mặc định)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: orishop-uploads-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 2. Deployment (Cách K8s chạy App và bơm cấu hình Database, mount thư mục ảnh)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -35,9 +48,16 @@ spec:
             secretKeyRef:
               name: orishop-db-secret
               key: DB_PASS
+        volumeMounts:
+        - name: uploads-volume
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads-volume
+        persistentVolumeClaim:
+          claimName: orishop-uploads-pvc
 
 ---
-# 2. Service (Cổng giao tiếp nội bộ K8s)
+# 3. Service (Cổng giao tiếp nội bộ K8s)
 apiVersion: v1
 kind: Service
 metadata:
@@ -51,16 +71,16 @@ spec:
       targetPort: 8091
 
 ---
-# 3. Ingress (Bảo vệ và điều hướng tên miền public CÓ SSL)
+# 4. Ingress (Bảo vệ và điều hướng tên miền public CÓ SSL)
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: orishop-ingress
   annotations:
-    kubernetes.io/ingress.class: "traefik"
     # Gọi Cert-Manager đi xin SSL
     cert-manager.io/cluster-issuer: "letsencrypt-prod" 
 spec:
+  ingressClassName: traefik # Sử dụng Ingress Class thay vì annotation cũ
   tls:
   - hosts:
     - orishop.quyenlt.com

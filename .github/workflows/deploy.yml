@@ -1,0 +1,46 @@
+name: Deploy to K3s VPS
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: |
+          tobi1008/orishop:latest
+          tobi1008/orishop:v${{ github.run_number }}
+
+    - name: Set up Kubernetes CLI (kubectl)
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.2'
+
+    - name: Deploy to K3s Cluster
+      env:
+        KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DATA }}
+      run: |
+        mkdir -p ~/.kube
+        echo "$KUBECONFIG_DATA" | base64 --decode > ~/.kube/config
+        
+        kubectl apply -f orishop-k8s.yaml --insecure-skip-tls-verify=true
+        kubectl rollout restart deployment/orishop-deployment --insecure-skip-tls-verify=true

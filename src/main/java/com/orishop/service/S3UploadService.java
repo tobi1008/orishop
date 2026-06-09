@@ -1,58 +1,62 @@
-package com.orishop.service; // Sửa lại package cho đúng cấu trúc
+package com.orishop.service;
 
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.annotation.PostConstruct; // Đổi thành jakarta vì dùng Spring Boot 3
+import jakarta.annotation.PostConstruct;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
 public class S3UploadService {
 
-    // Lấy tên Bucket và Region từ biến môi trường (đã khai báo trong file orishop-eks.yaml)
-    @Value("${AWS_S3_BUCKET_NAME:orishop-bucket}")
-    private String bucketName;
-
-    @Value("${AWS_REGION:ap-southeast-1}")
-    private String region;
-
-    private AmazonS3 s3Client;
+    @Value("${app.upload.dir:/app/uploads/}")
+    private String uploadDir;
 
     @PostConstruct
     public void init() {
-        // Khởi tạo S3 Client. 
-        // Lõi AWS SDK sẽ tự động lấy quyền từ IAM Role của EKS (DefaultAWSCredentialsProviderChain)
-        this.s3Client = AmazonS3ClientBuilder.standard()
-                .withRegion(region)
-                .build();
+        try {
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                boolean created = directory.mkdirs();
+                if (created) {
+                    System.out.println("Đã tạo thư mục lưu trữ ảnh: " + uploadDir);
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Không thể khởi tạo thư mục lưu trữ ảnh: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public String uploadFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            return null;
+        }
         try {
             // Tạo tên file độc nhất để không bị đè ảnh cũ (VD: 1234-5678_ao-thun.jpg)
             String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            
+            // Đường dẫn đích để lưu file
+            Path targetPath = Paths.get(uploadDir).resolve(fileName);
+            
+            // Sao chép file vào thư mục đích (đè lên nếu trùng tên)
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
-
-            // Đẩy ảnh lên kho S3
-            s3Client.putObject(new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata));
-
-            // Trả về đường link Public của ảnh để Controller lưu vào Database (RDS)
-            return s3Client.getUrl(bucketName, fileName).toString();
+            // Trả về đường dẫn tương đối để Client truy cập qua static resource mapping
+            return "/uploads/" + fileName;
         } catch (IOException e) {
+            System.err.println("Lỗi ghi file local: " + e.getMessage());
             e.printStackTrace();
             return null;
         } catch (Exception e) {
-            // Catch AmazonServiceException, SdkClientException, or any generic exception to prevent 500 errors
-            System.err.println("Lỗi từ AWS S3: " + e.getMessage());
+            System.err.println("Lỗi upload file local: " + e.getMessage());
             e.printStackTrace();
             return null;
         }
