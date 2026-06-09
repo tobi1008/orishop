@@ -18,8 +18,8 @@ jobs:
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v4
@@ -30,17 +30,30 @@ jobs:
           tobi1008/orishop:latest
           tobi1008/orishop:v${{ github.run_number }}
 
-    - name: Set up Kubernetes CLI (kubectl)
-      uses: azure/setup-kubectl@v3
+    - name: Copy k8s config to VPS
+      uses: appleboy/scp-action@master
       with:
-        version: 'v1.28.2'
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_KEY }}
+        port: 2210
+        source: "orishop-k8s.yaml"
+        target: "~/orishop-deploy"
 
-    - name: Deploy to K3s Cluster
-      env:
-        KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DATA }}
-      run: |
-        mkdir -p ~/.kube
-        echo "$KUBECONFIG_DATA" | base64 --decode > ~/.kube/config
-        
-        kubectl apply -f orishop-k8s.yaml --insecure-skip-tls-verify=true
-        kubectl rollout restart deployment/orishop-deployment --insecure-skip-tls-verify=true
+    - name: Deploy on K3s VPS via SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USERNAME }}
+        key: ${{ secrets.VPS_KEY }}
+        port: 2210
+        script: |
+          # Di chuyển vào thư mục deploy
+          mkdir -p ~/orishop-deploy
+          cd ~/orishop-deploy
+          
+          # Áp dụng cấu hình k8s (Dùng sudo đề phòng user không có quyền đọc k3s.yaml)
+          sudo kubectl apply -f orishop-k8s.yaml
+          
+          # Restart deployment để cập nhật Image mới
+          sudo kubectl rollout restart deployment/orishop-deployment
