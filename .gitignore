@@ -32,3 +32,11 @@ build/
 ### VS Code ###
 .vscode/
 src/main/resources/application.properties
+
+### Local / secrets ###
+.DS_Store
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.sql.bak
+.env
